@@ -1,0 +1,14 @@
+prefix=/cygdrive/c/Users/82104/AppData/Local/Android/Sdk/ndk/20.0.5594570/sources/armv8/android/armv8-a
+exec_prefix=${prefix}
+libdir=/cygdrive/c/Users/82104/AppData/Local/Android/Sdk/ndk/20.0.5594570/sources/armv8/android/armv8-a/lib
+includedir=/cygdrive/c/Users/82104/AppData/Local/Android/Sdk/ndk/20.0.5594570/sources/armv8/android/armv8-a/include
+
+Name: libavcodec
+Description: FFmpeg codec library
+Version: 58.54.100
+Requires: 
+Requires.private: libswresample >= 3.5.100, libavutil >= 56.31.100
+Conflicts:
+Libs: -L${libdir}  -lavcodec 
+Libs.private: -lm -lz
+Cflags: -I${includedir}

@@ -1,0 +1,9 @@
+LOCAL_PATH := $(call my-dir)
+include $(CLEAR_VARS)
+LOCAL_MODULE    := sample-ffmpeg
+LOCAL_SRC_FILES := sample-ffmpeg.c
+LOCAL_LDLIBS := -llog
+LOCAL_SHARED_LIBRARIES := libavcodec libavdevice libavfilter libavformat libavutil libswresample libswscale
+include $(BUILD_SHARED_LIBRARY)
+$(call import-add-path, C:\Android\AndroidProjects\FFmpeg0804\app)
+$(call import-module, libs)
