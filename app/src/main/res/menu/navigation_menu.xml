@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/tab1"
+        app:showAsAction="always"
+        android:icon="@drawable/word"
+        android:enabled="true"
+        android:checked="true"
+        android:title="단어" />
+
+    <item
+        android:id="@+id/tab2"
+        app:showAsAction="always"
+        android:icon="@drawable/image"
+        android:enabled="true"
+        android:title="이미지"/>
+
+    <item
+        android:id="@+id/tab3"
+        app:showAsAction="always"
+        android:icon="@drawable/home"
+        android:enabled="true"
+        android:title="home"/>
+
+</menu>

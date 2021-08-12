@@ -9,7 +9,7 @@
 #define LOGE(...) __android_log_print(6, LOG_TAG, __VA_ARGS__);
 
 
-JNIEXPORT jint JNICALL Java_com_example_ffmpeg0804_NDK_scanning(JNIEnv *env, jobject object, jstring filepath)
+JNIEXPORT jint JNICALL Java_com_example_TimeStampFinder_NDK_scanning(JNIEnv *env, jobject object, jstring filepath)
 {
 
     const char* nativeFilepath = (*env)->GetStringUTFChars( env, filepath , NULL ) ;

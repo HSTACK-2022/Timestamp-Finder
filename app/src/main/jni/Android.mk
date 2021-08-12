@@ -5,5 +5,5 @@ LOCAL_SRC_FILES := sample-ffmpeg.c
 LOCAL_LDLIBS := -llog
 LOCAL_SHARED_LIBRARIES := libavcodec libavdevice libavfilter libavformat libavutil libswresample libswscale
 include $(BUILD_SHARED_LIBRARY)
-$(call import-add-path, C:\Android\AndroidProjects\FFmpeg0804\app)
+$(call import-add-path, D:/programming/2021_SUMMER/TimeStampFinder/app)
 $(call import-module, libs)

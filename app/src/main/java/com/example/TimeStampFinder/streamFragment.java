@@ -1,63 +1,66 @@
 package com.example.TimeStampFinder;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.widget.VideoView;
 
 import androidx.fragment.app.Fragment;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link streamFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class streamFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public streamFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment streamFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static streamFragment newInstance(String param1, String param2) {
-        streamFragment fragment = new streamFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    VideoView tvideoView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_stream, container, false);
-    }
+//    @Override
+//    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+//                             Bundle savedInstanceState) {
+//        View view = inflater.inflate(R.layout.fragment_stream, container, false);
+//
+//        String str;
+//
+//        tvideoView = (VideoView)view.findViewById(R.id.videoView);
+//
+//        Bundle bundle = getArguments();
+//        str = bundle.getString("uri");
+//
+//        Log.d(TAG, "RESULT frag:" + str);
+//
+//        //영상 길이 알아내기
+//        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+//        retriever.setDataSource(str);
+//
+//        String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+//        long timeInmillisec = Long.parseLong(time); //예시로 7531 이면
+//        long duration = timeInmillisec / 1000; // 7.531 초
+//        long hours = duration / 3600;
+//        //long hours = TimeUnit.MILLISECONDS.toHours(timeInmillisec); 위랑 동일. TimeUnit 함수 쓴 것 뿐
+//        long minutes = (duration - hours * 3600) / 60; // 1분에 60000 msec임
+//        long seconds = duration - (hours * 3600 + minutes * 60);
+//        System.out.println("TIME length"+ time +"duration : "+ duration +" hours: " + hours + ", minutes: " + minutes + ", seconds: " + seconds);
+//
+//
+//        Button tbutton = (Button) view.findViewById(R.id.timebtn);
+//        tbutton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//               // videoView = v.findViewById(R.id.videoView);
+//                tvideoView.seekTo((int) timeInmillisec/2);
+//                tvideoView.start();
+//                System.out.println("hours: " + hours + ", minutes: " + minutes + ", seconds: " + seconds);
+////                System.out.format("%02d:%02d:%02d", hours, minutes, seconds);
+//            }
+//        });
+//
+////        Intent intent = new Intent(streamFragment.class , convertActivity.class);
+////        startActivityForResult(intent, 1000);
+//        // Inflate the layout for this fragment
+//        return view;
+//    }
+
+
 }

@@ -1,5 +1,6 @@
 LOCAL_PATH:= $(call my-dir)
-ABI := x86_64
+ABI := armv7-a
+
 include $(CLEAR_VARS)
 LOCAL_MODULE:= libavcodec
 LOCAL_SRC_FILES:= $(ABI)/lib/libavcodec.so

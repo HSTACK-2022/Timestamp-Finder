@@ -94,6 +94,12 @@ public class MainActivity extends AppCompatActivity {
                     txtPath = new FileWrite(txtName, getApplicationContext()).write(result);
                 }
             }.start();
+
+            //파일이 선택되면 두번째 activity로 넘기기(txt파일 생성)
+            Intent intent = new Intent(getBaseContext(), convertActivity.class);
+            intent.putExtra("uri",fileURI);
+            intent.putExtra("txtName", txtName);
+            startActivityForResult(intent, 1000);
         }
 
         //check
@@ -105,14 +111,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e("FFmpegForAndroid", "", e);
         }
-
-        // 파일이 선택되면 두번째 activity로 넘기기(txt파일 생성)
-        Intent intent = new Intent(getApplicationContext(), MediaActivity.class);
-        intent.putExtra("fileURI", fileURI);
-        intent.putExtra("txtName", txtName);
-        //intent.putExtra("txtPath", txtPath);
-
-        startActivity(intent);
     }
 
     // URI에서 파일명 얻기

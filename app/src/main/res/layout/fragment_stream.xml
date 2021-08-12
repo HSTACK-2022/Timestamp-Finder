@@ -3,12 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".streamFragment">
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/textView2"
+    <SearchView
+        android:layout_width="match_parent"
+        android:layout_height="48dp" />
+
+    <Button
+        android:id="@+id/timebtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="영상 보이는 곳(임시)" />
+        android:text="image" />
+
+
 </LinearLayout>

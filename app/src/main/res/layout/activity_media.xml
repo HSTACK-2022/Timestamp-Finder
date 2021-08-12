@@ -6,14 +6,14 @@
     android:orientation="vertical">
 
     <androidx.fragment.app.FragmentContainerView
-        android:name="com.example.ffmpeg0804.streamFragment"
+        android:name="com.example.TimeStampFinder.streamFragment"
         android:id="@+id/streamFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
     <androidx.fragment.app.FragmentContainerView
-        android:name="com.example.ffmpeg0804.timestampFragment"
+        android:name="com.example.TimeStampFinder.timestampFragment"
         android:id="@+id/timestampFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"

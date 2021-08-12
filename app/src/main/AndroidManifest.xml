@@ -17,16 +17,19 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.FFmpeg0804">
-        <activity android:name="com.example.TimeStampFinder.MainActivity">
+        android:theme="@style/Theme.TimeStampFinder"
+        android:usesCleartextTraffic="true"
+        android:configChanges="keyboardHidden|orientation|screenSize">
+        <activity android:name="com.example.TimeStampFinder.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.TimeStampFinder.MediaActivity">
+        <activity android:name="com.example.TimeStampFinder.convertActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
     </application>
-
 </manifest>
