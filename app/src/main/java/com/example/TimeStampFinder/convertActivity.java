@@ -45,7 +45,7 @@ public class convertActivity extends AppCompatActivity {
         super.onStart();
         Intent intent = getIntent();
         String str = intent.getStringExtra("uri");
-//        setResult(RESULT_OK, intent);
+        //setResult(RESULT_OK, intent);
         Log.d(TAG, "RESULT str:" + str);
 
         Bundle bundle = new Bundle();
@@ -56,7 +56,8 @@ public class convertActivity extends AppCompatActivity {
         isFull = false;
         layout = findViewById(R.id.videoview_frame);
 
-
+        // intent에서 파일 경로 빼내기
+        String txtPath = (String)intent.getSerializableExtra("txtPath");
 
         //제일 먼저 보여줄 프래그먼트 보여주기
         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, wFragment).commitAllowingStateLoss();
@@ -72,6 +73,9 @@ public class convertActivity extends AppCompatActivity {
                     case  R.id.tab1:
                         // replace(프레그먼트를 띄워줄 frameLayout, 교체할 fragment 객체)
                         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, wFragment).commitAllowingStateLoss();
+                        Bundle bund = new Bundle();
+                        bund.putString("txtPath", txtPath);
+                        wFragment.setArguments(bund);
                         return  true;
                     case  R.id.tab2:
                         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, iFragment).commitAllowingStateLoss();

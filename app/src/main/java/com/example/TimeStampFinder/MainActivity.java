@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // file access permission from user.
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void checkPermission() {
         if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
@@ -99,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(getBaseContext(), convertActivity.class);
             intent.putExtra("uri",fileURI);
             intent.putExtra("txtName", txtName);
+            intent.putExtra("txtPath", txtPath);
             startActivityForResult(intent, 1000);
         }
 

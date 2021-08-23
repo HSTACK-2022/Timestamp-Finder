@@ -1,11 +1,17 @@
 package com.example.TimeStampFinder;
 
+import android.content.Intent;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.SearchView;
+import android.widget.Switch;
 import android.widget.VideoView;
 
 import androidx.fragment.app.Fragment;
@@ -13,14 +19,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
 
 public class timestampFragment extends Fragment {
 
+    private final String TAG = "TIMESTAMP";
+
     VideoView tvideoView;
     private RecyclerAdapter adapter;
+
+    private HashMap<String, String> searchRes;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,6 +51,10 @@ public class timestampFragment extends Fragment {
         str = bundle.getString("uri");
 
         Log.d(TAG, "RESULT frag:" + str);
+
+        // Bundle 꺼내기
+        Bundle bund = getArguments();
+        String txtPath = bund.getString("txtPath");
 
         //영상 길이 알아내기
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
@@ -63,6 +78,20 @@ public class timestampFragment extends Fragment {
         adapter = new RecyclerAdapter();
         recyclerView.setAdapter(adapter);
 
+        // search 구현
+        EditText word = view.findViewById(R.id.searchText);
+        ImageButton submit = view.findViewById(R.id.imageButton);
+        Switch mode = view.findViewById(R.id.switchMode);
+
+        // submit 이미지 버튼을 클릭하면 검색이 시작된다.
+        submit.setOnClickListener((new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SearchWord sw = new SearchWord(word.getText().toString(), "", mode.isChecked());
+                try{ searchRes = sw.findWord();}
+                catch(Exception e){ Log.e(TAG, " ", e); }
+            }
+        }));
 
         List<String> listTitle = Arrays.asList("출력 단어");
         List<String> listContent = Arrays.asList(

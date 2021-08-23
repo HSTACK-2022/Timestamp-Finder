@@ -778,6 +778,7 @@ static int write_output_file_trailer(AVFormatContext *output_format_context)
 
 int main(int argc, char **argv)
 {
+
     AVFormatContext *input_format_context = NULL, *output_format_context = NULL;
     AVCodecContext *input_codec_context = NULL, *output_codec_context = NULL;
     SwrContext *resample_context = NULL;
