@@ -38,7 +38,7 @@ public class timestampFragment extends Fragment {
     private static Boolean isFin = false;
 
     // 음성인식 스레드가 끝났는지 확인하기 위한 함수
-    static void setfinish(boolean b){
+    public static void setfinish(boolean b){
         isFin = b;
         Log.d("CHECK", "isFin : "+isFin);
     }
@@ -50,8 +50,7 @@ public class timestampFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_timestamp,container,false);
         String str;
@@ -91,6 +90,13 @@ public class timestampFragment extends Fragment {
         ImageButton submit = view.findViewById(R.id.imageButton);
         Switch mode = view.findViewById(R.id.switchMode);
         TextView sgWord = view.findViewById(R.id.suggestion);
+
+        // Image Button 비활성화 여부 결정
+        if(isFin){
+            submit.setEnabled(true);
+        }else{
+            submit.setEnabled(false);
+        }
 
         // suggest 구현
         new Thread() {

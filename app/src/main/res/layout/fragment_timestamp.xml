@@ -23,8 +23,8 @@
                 android:id="@+id/searchText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="6"
-                android:ems="10"
+                android:layout_weight="8"
+                android:ems="20"
                 android:hint="검색어를 입력하세요 (여러 개의 경우 ,로 구분)"
                 android:inputType="text"
                 android:textSize="16sp" />
@@ -32,9 +32,11 @@
             <ImageButton
                 android:id="@+id/imageButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                app:srcCompat="@android:drawable/ic_menu_search" />
+                android:scaleType="center"
+                app:srcCompat="@drawable/imgbutton_drawable" />
+
         </LinearLayout>
 
     </LinearLayout>
