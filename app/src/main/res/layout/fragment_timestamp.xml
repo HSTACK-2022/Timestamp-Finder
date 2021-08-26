@@ -50,18 +50,38 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/suggest_hint"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text=" 추천 단어 " />
+
+            <TextView
                 android:id="@+id/suggestion"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="TextView" />
+                android:layout_weight="4"
+                android:text="TextView"
+                android:textAlignment="gravity"
+                android:textColor="@color/purple_700" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:text="를 검색해보세요!" />
 
             <Switch
                 android:id="@+id/switchMode"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="강한검색" />
+                android:layout_weight="3"
+                android:ellipsize="start"
+                android:scrollbarSize="4dp"
+                android:text="강한 검색"
+                android:textSize="12sp" />
+
         </LinearLayout>
     </LinearLayout>
 

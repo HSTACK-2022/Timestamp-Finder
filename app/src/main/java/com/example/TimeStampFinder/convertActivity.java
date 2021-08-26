@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -17,6 +18,7 @@ import android.widget.MediaController;
 import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -31,6 +33,11 @@ public class convertActivity extends AppCompatActivity {
     Fragment wFragment = new timestampFragment();
     Fragment iFragment = new streamFragment();
 
+    private String fileURI;
+    private String txtName;
+    private String txtPath;
+    private FileWrite fw;           // 변환된 텍스트 파일을 생성하고 경로를 받기 위한 객체
+    private boolean isFinished = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,16 +55,31 @@ public class convertActivity extends AppCompatActivity {
         //setResult(RESULT_OK, intent);
         Log.d(TAG, "RESULT str:" + str);
 
+        // intent에서 파일 경로 빼내기
+        fileURI = (String)intent.getSerializableExtra("fileURI");
+        txtName = (String)intent.getSerializableExtra("txtName");
+
+        // 빈 파일 생성, 경로만 미리 가져오기
+        fw = new FileWrite(txtName, getApplicationContext());
+        txtPath = fw.create();
+
+        new Thread() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            public void run() {
+                // 지금은 언어를 고정해두지만 후에는 사용자가 선택할 수 있게끔 해야함.
+                String result = new Pcm2Text().pcm2text("korean", fileURI);
+                fw.write(result, txtPath);
+                timestampFragment.setfinish(true);      // Fragment에 변수 변경 알려주기
+            }
+        }.start();
+
         Bundle bundle = new Bundle();
         bundle.putString("uri",str);
-
+        bundle.putString("txtPath", txtPath);
         wFragment.setArguments(bundle);
 
         isFull = false;
         layout = findViewById(R.id.videoview_frame);
-
-        // intent에서 파일 경로 빼내기
-        String txtPath = (String)intent.getSerializableExtra("txtPath");
 
         //제일 먼저 보여줄 프래그먼트 보여주기
         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, wFragment).commitAllowingStateLoss();
@@ -73,9 +95,6 @@ public class convertActivity extends AppCompatActivity {
                     case  R.id.tab1:
                         // replace(프레그먼트를 띄워줄 frameLayout, 교체할 fragment 객체)
                         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, wFragment).commitAllowingStateLoss();
-                        Bundle bund = new Bundle();
-                        bund.putString("txtPath", txtPath);
-                        wFragment.setArguments(bund);
                         return  true;
                     case  R.id.tab2:
                         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, iFragment).commitAllowingStateLoss();

@@ -1,5 +1,7 @@
 package com.example.TimeStampFinder;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -8,9 +10,10 @@ import java.util.Iterator;
 
 public class SearchWord {
 
-    static private String word;			// 찾고자 하는 단어(,로 구분)
-    static private String path;         // 파일을 저장한 경로
-    private boolean strongMode;	// 강한 검색 여부
+    private static String word;			// 찾고자 하는 단어(,로 구분)
+    private static String path;         // 파일을 저장한 경로
+    private boolean strongMode;	        // 강한 검색 여부
+    private final String TAG = "SEARCH";
 
     // 생성자
     public SearchWord() {
@@ -36,12 +39,16 @@ public class SearchWord {
         BufferedReader br = new BufferedReader(new FileReader(new File(path)));
         HashMap<String, String> result  = new HashMap<String, String>();
 
+        //String temp = br.readLine();        // 실제 사용시 첫 줄은 빈칸으로 나오므로 temp에 저장, null 방지
+
         // 파일의 모든 줄을 돌며 단어 검색
         while((txtIndex = br.readLine())!=null){
 
             int i;
             //txtIndex = br.readLine();		// 각 줄의 index 저장
             txtStr = br.readLine();			// 각 줄의 내용 저장
+
+            Log.d(TAG, "txtStr : "+txtStr);
 
             // 강한 검색
             if(strongMode) {
