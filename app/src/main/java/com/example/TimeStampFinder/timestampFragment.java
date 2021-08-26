@@ -53,20 +53,18 @@ public class timestampFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_timestamp,container,false);
-        String str;
-
         //tvideoView = (VideoView)view.findViewById(R.id.videoView);
 
         Bundle bundle = getArguments();
-        str = bundle.getString("uri");
+        String fileURI = bundle.getString("fileURI");
         String txtPath = bundle.getString("txtPath");
 
-        Log.d(TAG, "RESULT frag : " + str);
+        Log.d(TAG, "RESULT frag : " + fileURI);
         Log.d(TAG, "Text Path " + txtPath);
 
         //영상 길이 알아내기
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(str);
+        retriever.setDataSource(fileURI);
 
         String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
         long timeInmillisec = Long.parseLong(time); //예시로 7531 이면

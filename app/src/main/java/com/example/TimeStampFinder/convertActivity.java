@@ -6,6 +6,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
@@ -23,6 +24,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.io.File;
+import java.io.IOException;
 
 import static android.content.ContentValues.TAG;
 
@@ -51,17 +55,31 @@ public class convertActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         Intent intent = getIntent();
-        String str = intent.getStringExtra("uri");
-        //setResult(RESULT_OK, intent);
-        Log.d(TAG, "RESULT str:" + str);
-
-        // intent에서 파일 경로 빼내기
         fileURI = (String)intent.getSerializableExtra("fileURI");
         txtName = (String)intent.getSerializableExtra("txtName");
+        //setResult(RESULT_OK, intent);
 
         // 빈 파일 생성, 경로만 미리 가져오기
         fw = new FileWrite(txtName, getApplicationContext());
         txtPath = fw.create();
+
+        // 방법이 없을까?
+        new Thread(){
+            public void run(){
+                // 비디오를 음원파일로 변경
+                String filepath;
+                try {
+                    Log.d(TAG, Environment.getExternalStorageDirectory().getAbsolutePath());
+                    filepath = new File(fileURI).getCanonicalPath();
+                    new NDK().scanning(filepath);
+                    //new NDK().decode_audio("/storage/emulated/0/Movies/hello.wav", "/storage/emulated/0/Movies/hello.mp3")
+                    //new NDK().decode_video("/storage/emulated/0/Movies/videoplayback.mp4", "/storage/emulated/0/Movies/videoplayback.wav");
+                    Log.d(TAG, "DECODE_AUDIO : TRUE");
+                } catch (IOException e) {
+                    Log.e("FFmpegForAndroid", "", e);
+                }
+            }
+        }.start();
 
         new Thread() {
             @RequiresApi(api = Build.VERSION_CODES.O)
@@ -74,7 +92,7 @@ public class convertActivity extends AppCompatActivity {
         }.start();
 
         Bundle bundle = new Bundle();
-        bundle.putString("uri",str);
+        bundle.putString("fileURI",fileURI);
         bundle.putString("txtPath", txtPath);
         wFragment.setArguments(bundle);
 
@@ -127,13 +145,13 @@ public class convertActivity extends AppCompatActivity {
         MediaController mc = new MediaController(this); // 비디오 컨트롤 가능하게(일시정지, 재시작 등)
         videoView.setMediaController(mc);
 
-        videoView.setVideoURI(Uri.parse(str));
+        videoView.setVideoURI(Uri.parse(fileURI));
         videoView.requestFocus();
         videoView.start();
 
         //영상 길이 알아내기
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(str);
+        retriever.setDataSource(fileURI);
 
         String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
         long timeInmillisec = Long.parseLong(time); //예시로 7531 이면

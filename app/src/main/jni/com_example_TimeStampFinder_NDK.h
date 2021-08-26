@@ -15,6 +15,22 @@ extern "C" {
 JNIEXPORT jint JNICALL Java_com_example_TimeStampFinder_NDK_scanning
   (JNIEnv *, jobject, jstring);
 
+/*
+ * Class:     com_example_TimeStampFinder_NDK
+ * Method:    decode_audio
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_com_example_TimeStampFinder_NDK_decode_1audio
+  (JNIEnv *, jobject, jstring, jstring);
+
+/*
+ * Class:     com_example_TimeStampFinder_NDK
+ * Method:    decode_video
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_com_example_TimeStampFinder_NDK_decode_1video
+  (JNIEnv *, jobject, jstring, jstring);
+
 #ifdef __cplusplus
 }
 #endif

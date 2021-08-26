@@ -1,5 +1,4 @@
-./obj/local/x86/objs/sample-ffmpeg/sample-ffmpeg.o: jni\sample-ffmpeg.c \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavformat\avformat.h \
+./obj/local/x86/objs/sample-ffmpeg/decode-video.o: jni\decode-video.c \
   D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavcodec\avcodec.h \
   D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\samplefmt.h \
   D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\avutil.h \
@@ -21,18 +20,7 @@
   D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\dict.h \
   D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\frame.h \
   D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\hwcontext.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavcodec\version.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavformat\avio.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavformat\version.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\audio_fifo.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\fifo.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\avassert.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\avstring.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\opt.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libswresample\swresample.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libswresample\version.h
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavformat\avformat.h:
+  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavcodec\version.h
 
 D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavcodec\avcodec.h:
 
@@ -77,21 +65,3 @@ D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\frame.
 D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\hwcontext.h:
 
 D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavcodec\version.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavformat\avio.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavformat\version.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\audio_fifo.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\fifo.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\avassert.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\avstring.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libavutil\opt.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libswresample\swresample.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\x86\include\libswresample\version.h:

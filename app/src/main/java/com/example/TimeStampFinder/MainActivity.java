@@ -92,20 +92,10 @@ public class MainActivity extends AppCompatActivity {
 
             //파일이 선택되면 두번째 activity로 넘기기(txt파일 생성)
             Intent intent = new Intent(getBaseContext(), convertActivity.class);
-            intent.putExtra("uri",fileURI);
+            intent.putExtra("fileURI",fileURI);
             intent.putExtra("txtName", txtName);
             startActivityForResult(intent, 1000);
 
-        }
-
-        //check
-        String filepath;
-        try {
-            Log.d(TAG, Environment.getExternalStorageDirectory().getAbsolutePath());
-            filepath = new File(fileURI).getCanonicalPath();
-            new NDK().scanning(filepath);
-        } catch (IOException e) {
-            Log.e("FFmpegForAndroid", "", e);
         }
     }
 

@@ -1,6 +1,5 @@
-./obj/local/arm64-v8a/objs/sample-ffmpeg/sample-ffmpeg.o: \
-  jni\sample-ffmpeg.c \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavformat\avformat.h \
+./obj/local/arm64-v8a/objs/sample-ffmpeg/decode-video.o: \
+  jni\decode-video.c \
   D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavcodec\avcodec.h \
   D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\samplefmt.h \
   D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\avutil.h \
@@ -22,18 +21,7 @@
   D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\dict.h \
   D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\frame.h \
   D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\hwcontext.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavcodec\version.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavformat\avio.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavformat\version.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\audio_fifo.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\fifo.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\avassert.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\avstring.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\opt.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libswresample\swresample.h \
-  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libswresample\version.h
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavformat\avformat.h:
+  D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavcodec\version.h
 
 D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavcodec\avcodec.h:
 
@@ -78,21 +66,3 @@ D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\fr
 D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\hwcontext.h:
 
 D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavcodec\version.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavformat\avio.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavformat\version.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\audio_fifo.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\fifo.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\avassert.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\avstring.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libavutil\opt.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libswresample\swresample.h:
-
-D:\programming\2021_SUMMER\TimeStampFinder\app\libs\armv8-a\include\libswresample\version.h:
