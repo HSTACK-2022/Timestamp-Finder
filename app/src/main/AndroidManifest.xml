@@ -28,7 +28,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.TimeStampFinder.convertActivity"
+        <activity android:name="com.example.TimeStampFinder.ConvertActivity"
             android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
     </application>

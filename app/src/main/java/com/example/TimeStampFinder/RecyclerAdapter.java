@@ -1,5 +1,6 @@
 package com.example.TimeStampFinder;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemViewHolder> {
 
+    Context context;
     private ArrayList<Data> listData = new ArrayList<>();
 
     @NonNull
@@ -45,6 +47,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
 
 
     boolean removeAll(){
+        // 외부에서 모든 Item을 제거할 함수입니다.
         return listData.removeAll(listData);
     }
 
@@ -67,13 +70,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
         void onBind(Data data) {
             textView1.setText(data.getTitle());
             textView2.setText(data.getContent());
+            int exsec = 30000;
+
             tBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    Intent rintent = getIntent();
-//                    String time = rintent.getStringExtra("time");
-////        setResult(RESULT_OK, intent);
-//                    Log.d(TAG, "RESULT time:" + time);
+                    // n은 임의지정, msec단위 (1초=1000)
+                    int n = 10000;
+                    ((ConvertActivity) ConvertActivity.mContext).show(n);
                 }
             });
         }

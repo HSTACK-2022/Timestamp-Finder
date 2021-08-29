@@ -1,5 +1,6 @@
 package com.example.TimeStampFinder;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.media.MediaMetadataRetriever;
@@ -30,24 +31,27 @@ import java.io.IOException;
 
 import static android.content.ContentValues.TAG;
 
-public class convertActivity extends AppCompatActivity {
-    VideoView videoView;
-    boolean isFull;
-    FrameLayout layout;
-    Fragment wFragment = new timestampFragment();
-    Fragment iFragment = new streamFragment();
+public class ConvertActivity extends AppCompatActivity {
+
+    public static Context mContext;
+    private VideoView videoView;
+    private FrameLayout layout;
+    private Fragment wFragment = new TimestampFragment();
+    private Fragment iFragment = new StreamFragment();
 
     private String fileURI;
     private String txtName;
     private String txtPath;
     private FileWrite fw;           // 변환된 텍스트 파일을 생성하고 경로를 받기 위한 객체
-    private boolean isFinished = false;
+    private boolean isFull;         // 전체화면 여부를 받기 위한 변수
+    private boolean isFinished = false;     // STT가 모두 돌아갔는지 확인하기 위한 변수
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_convert);
 
+        mContext = this;
         videoView = findViewById(R.id.videoView);
     }
 
@@ -87,7 +91,7 @@ public class convertActivity extends AppCompatActivity {
                 // 지금은 언어를 고정해두지만 후에는 사용자가 선택할 수 있게끔 해야함.
                 String result = new Pcm2Text().pcm2text("korean", fileURI);
                 fw.write(result, txtPath);
-                timestampFragment.setfinish(true);      // Fragment에 변수 변경 알려주기
+                TimestampFragment.setfinish(true);      // Fragment에 변수 변경 알려주기
             }
         }.start();
 
@@ -99,6 +103,51 @@ public class convertActivity extends AppCompatActivity {
         isFull = false;
         layout = findViewById(R.id.videoview_frame);
 
+        // 네비게이션 메뉴 활성화
+        bottomNavigation();
+
+        // 전체화면 버튼 활성화
+        Button fullButton = findViewById(R.id.fullscreen_button);
+        fullButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                setFullScreen(!isFull);
+                v.setBackgroundResource(isFull ? R.drawable.reduction : R.drawable.fullicon);
+            }
+        });
+
+        //비디오를 보여주기 시작함
+        show(0);
+
+        //영상 길이 알아내기
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(fileURI);
+
+        String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        long timeInmillisec = Long.parseLong(time); //예시로 7531 이면
+
+        long duration = timeInmillisec / 1000; // 7.531 초
+        long hours = duration / 3600;
+        //long hours = TimeUnit.MILLISECONDS.toHours(timeInmillisec); 위랑 동일. TimeUnit 함수 쓴 것 뿐
+        long minutes = (duration - hours * 3600) / 60; // 1분에 60000 msec임
+        long seconds = duration - (hours * 3600 + minutes * 60);
+        System.out.println("TIME length"+ time +"duration : "+ duration +" hours: " + hours + ", minutes: " + minutes + ", seconds: " + seconds);
+
+    }
+
+    public void show(int n)
+    {
+        MediaController mc = new MediaController(this); // 비디오 컨트롤 가능하게(일시정지, 재시작 등)
+        videoView.setMediaController(mc);
+        videoView.setVideoURI(Uri.parse(fileURI));
+        videoView.requestFocus();
+        videoView.seekTo(n);
+        videoView.start();
+        //startVideo();
+    }
+
+    //네비게이션 메뉴 함수
+    void bottomNavigation() {
         //제일 먼저 보여줄 프래그먼트 보여주기
         getSupportFragmentManager().beginTransaction().replace(R.id.frame_layout, wFragment).commitAllowingStateLoss();
 
@@ -126,86 +175,46 @@ public class convertActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
-        Button button = findViewById(R.id.fullscreen_button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setFullScreen(!isFull);
-                v.setBackgroundResource(isFull ? R.drawable.reduction : R.drawable.fullicon);
-            }
-        });
-
-//        Bundle bundle = new Bundle();
-//        bundle.putString("uri",str);
-//
-//        stFragment.setArguments(bundle);
-
-
+    //비디오가 시작하는 함수
+    void startVideo() {
         MediaController mc = new MediaController(this); // 비디오 컨트롤 가능하게(일시정지, 재시작 등)
         videoView.setMediaController(mc);
 
         videoView.setVideoURI(Uri.parse(fileURI));
         videoView.requestFocus();
+        videoView.seekTo(10000);
         videoView.start();
-
-        //영상 길이 알아내기
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(fileURI);
-
-        String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-        long timeInmillisec = Long.parseLong(time); //예시로 7531 이면
-
-//        Intent rIntent = new Intent(convertActivity.this, RecyclerAdapter.class);
-//        rIntent.putExtra("time",timeInmillisec);
-//        startActivity(rIntent);
-
-        long duration = timeInmillisec / 1000; // 7.531 초
-        long hours = duration / 3600;
-        //long hours = TimeUnit.MILLISECONDS.toHours(timeInmillisec); 위랑 동일. TimeUnit 함수 쓴 것 뿐
-        long minutes = (duration - hours * 3600) / 60; // 1분에 60000 msec임
-        long seconds = duration - (hours * 3600 + minutes * 60);
-        System.out.println("TIME length"+ time +"duration : "+ duration +" hours: " + hours + ", minutes: " + minutes + ", seconds: " + seconds);
-
-
-        //버튼 누르면 해당 시간으로 가는 함수
-//        Button tbutton = findViewById(R.id.timebtn);
-//        tbutton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                videoView.seekTo((int) timeInmillisec/2);
-//                videoView.start();
-//                System.out.println("hours: " + hours + ", minutes: " + minutes + ", seconds: " + seconds);
-////                System.out.format("%02d:%02d:%02d", hours, minutes, seconds);
-//            }
-//        });
-
-
     }
 
+    // 비디오 재시작
+    void restartVideo(int sec){
+        videoView.seekTo(sec);
+    }
 
-        private void setFullScreen(boolean full) {
+    // 비디오 전체화면 설정
+    private void setFullScreen(boolean full) {
 
-            isFull = full;
-            ViewGroup.LayoutParams params = layout.getLayoutParams();
+        isFull = full;
+        ViewGroup.LayoutParams params = layout.getLayoutParams();
 
+        if (isFull) {
+            isFull = true;
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        } else {
+            isFull = false;
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-            if (isFull) {
-                isFull = true;
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                params.height = ViewGroup.LayoutParams.MATCH_PARENT;
-                getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            } else {
-                isFull = false;
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            int height = (int) (metrics.density * 250);
+            params.height = height;
 
-                DisplayMetrics metrics = new DisplayMetrics();
-                getWindowManager().getDefaultDisplay().getMetrics(metrics);
-                int height = (int) (metrics.density * 250);
-                params.height = height;
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-            }
         }
     }
+}

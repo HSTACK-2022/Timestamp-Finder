@@ -28,7 +28,7 @@ import java.util.List;
 
 import static android.content.ContentValues.TAG;
 
-public class timestampFragment extends Fragment {
+public class TimestampFragment extends Fragment {
 
     private final String TAG = "TIMESTAMP";
 
@@ -90,11 +90,12 @@ public class timestampFragment extends Fragment {
         TextView sgWord = view.findViewById(R.id.suggestion);
 
         // Image Button 비활성화 여부 결정
-        if(isFin){
+        if (true) {
             submit.setEnabled(true);
-        }else{
+        } else {
             submit.setEnabled(false);
         }
+
 
         // suggest 구현
         new Thread() {
@@ -166,23 +167,6 @@ public class timestampFragment extends Fragment {
 
          */
 
-// 이거 컨버트에 옮겨서 findViewId 이용해보기
-//        버튼 누르면 해당 시간으로 가는 함수
-//        Button tbutton = (Button) view.findViewById(R.id.timebtn);
-//        tbutton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//               // videoView = v.findViewById(R.id.videoView);
-//                tvideoView.seekTo((int) timeInmillisec/2);
-//                tvideoView.start();
-//                System.out.println("hours: " + hours + ", minutes: " + minutes + ", seconds: " + seconds);
-////                System.out.format("%02d:%02d:%02d", hours, minutes, seconds);
-//            }
-//        });
-
-        //리사이클러 부분 https://dev-imaec.tistory.com/27
-
-        // Inflate the layout for this fragment
         return view;
     }
 
