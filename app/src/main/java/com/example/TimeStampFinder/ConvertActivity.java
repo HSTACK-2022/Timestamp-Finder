@@ -120,19 +120,7 @@ public class ConvertActivity extends AppCompatActivity {
         show(0);
 
         //영상 길이 알아내기
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(fileURI);
-
-        String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-        long timeInmillisec = Long.parseLong(time); //예시로 7531 이면
-
-        long duration = timeInmillisec / 1000; // 7.531 초
-        long hours = duration / 3600;
-        //long hours = TimeUnit.MILLISECONDS.toHours(timeInmillisec); 위랑 동일. TimeUnit 함수 쓴 것 뿐
-        long minutes = (duration - hours * 3600) / 60; // 1분에 60000 msec임
-        long seconds = duration - (hours * 3600 + minutes * 60);
-        System.out.println("TIME length"+ time +"duration : "+ duration +" hours: " + hours + ", minutes: " + minutes + ", seconds: " + seconds);
-
+        Log.d(TAG, "Video Length : "+TimestampFragment.videoLength(fileURI));
     }
 
     public void show(int n)

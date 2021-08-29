@@ -55,28 +55,30 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
     // 여기서 subView를 setting 해줍니다.
     class ItemViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView textView1;
-        private TextView textView2;
+        private TextView index;
+        private TextView content;
         private Button tBtn;
 
         ItemViewHolder(View itemView) {
             super(itemView);
 
-            textView1 = itemView.findViewById(R.id.textView1);
-            textView2 = itemView.findViewById(R.id.textView2);
+            index= itemView.findViewById(R.id.textView1);
+            content = itemView.findViewById(R.id.textView2);
             tBtn = itemView.findViewById(R.id.tBtn);
         }
 
         void onBind(Data data) {
-            textView1.setText(data.getTitle());
-            textView2.setText(data.getContent());
+            index.setText(data.getTitle());
+            content.setText(data.getContent());
             int exsec = 30000;
 
             tBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // n은 임의지정, msec단위 (1초=1000)
-                    int n = 10000;
+                    // index(초단위를 index로 저장할 예정)를 받아 해당 index로 이동하게끔 버튼 설정
+                    int n = Integer.parseInt(data.getTitle());
+                    // msec단위 (1초=1000, index는 10초 간격) 조정
+                    n *= 10000;
                     ((ConvertActivity) ConvertActivity.mContext).show(n);
                 }
             });
