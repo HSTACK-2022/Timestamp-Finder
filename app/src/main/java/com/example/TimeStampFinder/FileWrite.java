@@ -24,18 +24,14 @@ public class FileWrite {
     public String create() {
         try {
             File path = con.getFilesDir();
-            File dir = new File(path, fileName);
-            if (!dir.exists())
-                dir.mkdir();
-
             Log.d(TAG, "FILE PATH : " + path);
 
-            file = new File(dir + "/" + fileName);
+            file = new File(path, fileName);
             if (!file.exists())
                 file.createNewFile();
 
-            Log.d(TAG, "return message : "+dir+"/"+fileName);
-            return dir+"/"+fileName;
+            Log.d(TAG, "return message : "+path+"/"+fileName);
+            return path+"/"+fileName;
         }
         catch(Exception e) {
             Log.d(TAG, "ERROR : " + e);

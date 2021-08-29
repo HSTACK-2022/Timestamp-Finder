@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static android.content.ContentValues.TAG;
+import static java.lang.Thread.sleep;
 
 public class ConvertActivity extends AppCompatActivity {
 
@@ -44,7 +45,20 @@ public class ConvertActivity extends AppCompatActivity {
     private String txtPath;
     private FileWrite fw;           // 변환된 텍스트 파일을 생성하고 경로를 받기 위한 객체
     private boolean isFull;         // 전체화면 여부를 받기 위한 변수
-    private boolean isFinished = false;     // STT가 모두 돌아갔는지 확인하기 위한 변수
+    private static boolean isFin[]; // STT가 모두 돌아갔는지 확인하기 위한 변수
+
+    // 각 스레드로 분산하여 보낸 파일들이 잘 들어갔는지 확인하기 위한 함수
+    // nget.wav부터 시작한 파일의 기록 여부는 inFin[n]에 담겨있음
+    public static void setFin(int index){ isFin[index] = true; }
+
+    // 파일이 모두 다 기록되었는지 확인하기 위한 함수
+    private boolean finCheck(){
+        for(int i=1;i<isFin.length;i++){
+            if(!isFin[i])
+                return false;
+        }
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +69,7 @@ public class ConvertActivity extends AppCompatActivity {
         videoView = findViewById(R.id.videoView);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onStart() {
         super.onStart();
@@ -85,16 +100,6 @@ public class ConvertActivity extends AppCompatActivity {
             }
         }.start();
 
-        new Thread() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            public void run() {
-                // 지금은 언어를 고정해두지만 후에는 사용자가 선택할 수 있게끔 해야함.
-                String result = new Pcm2Text().pcm2text("korean", fileURI);
-                fw.write(result, txtPath);
-                TimestampFragment.setfinish(true);      // Fragment에 변수 변경 알려주기
-            }
-        }.start();
-
         Bundle bundle = new Bundle();
         bundle.putString("fileURI",fileURI);
         bundle.putString("txtPath", txtPath);
@@ -121,6 +126,57 @@ public class ConvertActivity extends AppCompatActivity {
 
         //영상 길이 알아내기
         Log.d(TAG, "Video Length : "+TimestampFragment.videoLength(fileURI));
+
+        // 잘린 wav 파일이 모두 들어왔다고 가정하고 스레드로 넘기기
+        int size = 12;      // 파일의 개수를 임의로 지정하자.
+
+        new Thread(){
+            public void run(){
+                int maxFile = 5;       // 한번에 보낼 파일의 수
+                int num = (size/maxFile)+1;   // 5개씩 나눠 보낼 예정
+                isFin = new boolean[num+1];
+                String tmpPath[] = new String[num+1];
+
+                for(int i=1;i<=num;i++){
+                    //isFin 초기화
+                    isFin[i] = false;
+                    // 새로운 FileWriter 생성
+                    String tmpName = "temp"+i+".txt";
+                    FileWrite fw = new FileWrite(tmpName, getApplicationContext());
+                    tmpPath[i] = fw.create();
+                    // 새로운 스레드 생성 : 5개의 오디오파일을 기록하는 스레드
+                    SttThread st;
+                    if(i==num)      st = new SttThread((i-1)*maxFile+1, size, fw, tmpPath[i]);
+                    else            st = new SttThread((i-1)*maxFile+1, i*maxFile, fw, tmpPath[i]);
+                    st.run();
+                }
+
+                do{
+                    try{sleep(1000);}
+                    catch(Exception e){ e.printStackTrace(); }
+                }while(!finCheck());
+
+                // 파일 합산
+                for(int i=1;i<=num;i++){
+                    fw.write(FileWrite.read(tmpPath[i]), txtPath);
+                }
+
+                // 다 끝났으면 TimestampFragment로 알림
+                TimestampFragment.setfinish(true);
+            }
+        }.start();
+
+        /*
+        new Thread() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            public void run() {
+                // 지금은 언어를 고정해두지만 후에는 사용자가 선택할 수 있게끔 해야함.
+                String result = new Pcm2Text().pcm2text("korean", fileURI);
+                fw.write(result, txtPath);
+                TimestampFragment.setfinish(true);      // Fragment에 변수 변경 알려주기
+            }
+        }.start();
+         */
     }
 
     public void show(int n)

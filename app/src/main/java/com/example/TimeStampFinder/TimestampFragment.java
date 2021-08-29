@@ -107,7 +107,7 @@ public class TimestampFragment extends Fragment {
             @RequiresApi(api = Build.VERSION_CODES.N)
             public void run() {
                 try {
-                    sgWord.setText(SuggestWord.suggest("storage/emulated/0/Download/test.txt"));
+                    sgWord.setText(SuggestWord.suggest(txtPath));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -120,7 +120,7 @@ public class TimestampFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 adapter.removeAll();
-                SearchWord sw = new SearchWord(word.getText().toString(), "storage/emulated/0/Download/test.txt", mode.isChecked());
+                SearchWord sw = new SearchWord(word.getText().toString(), txtPath, mode.isChecked());
                 try{
                     searchRes = sw.findWord();
                     List<String> listTitle = new ArrayList<>(searchRes.keySet());
