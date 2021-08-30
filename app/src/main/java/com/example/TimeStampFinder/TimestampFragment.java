@@ -1,7 +1,10 @@
 package com.example.TimeStampFinder;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaMetadataRetriever;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -25,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static android.content.ContentValues.TAG;
 import static java.lang.Thread.sleep;
@@ -33,13 +39,21 @@ public class TimestampFragment extends Fragment {
 
     private final String TAG = "TIMESTAMP_FRAGMENT";
 
-    VideoView tvideoView;
     private RecyclerAdapter adapter;
     private HashMap<String, String> searchRes;
-    private static Boolean isFin = false;
 
-    // 음성인식 스레드가 끝났는지 확인하기 위한 함수
-    public static void setfinish(boolean b){ isFin = b; Log.d("TIMESTAMP", "true");}
+    private String fileURI;
+    private String txtName;
+    private String txtPath;
+    private static boolean isFin = false;
+
+    private EditText word;
+    private ImageButton submit;
+    private Switch mode;
+    private TextView sgWord;
+
+    // txtFile의 완성 여부 확인
+    public static void setFin(){ isFin = true; }
 
     // 영상 길이를 확인하기 위한 함수
     public static String videoLength(String fileURI){
@@ -61,36 +75,37 @@ public class TimestampFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        }
+
+        // Bundle 빼내기
+        Bundle bundle = getArguments();
+        fileURI = bundle.getString("fileURI");
+        txtName = bundle.getString("txtName");
+        txtPath = bundle.getString("txtPath");
+
+        Log.d(TAG, "RESULT frag : " + fileURI);
+        Log.d(TAG, "Text Path " + txtPath);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_timestamp,container,false);
-        //tvideoView = (VideoView)view.findViewById(R.id.videoView);
-
-        Bundle bundle = getArguments();
-        String fileURI = bundle.getString("fileURI");
-        String txtPath = bundle.getString("txtPath");
-
-        Log.d(TAG, "RESULT frag : " + fileURI);
-        Log.d(TAG, "Text Path " + txtPath);
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView); //얘는 view대신 getView를 써야한다 이유는 위에서 return 했기 때문
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(linearLayoutManager);
 
-        adapter = new RecyclerAdapter();
-        recyclerView.setAdapter(adapter);
-
         //영상 길이 알아내기
         Log.d(TAG, "Video Length : "+TimestampFragment.videoLength(fileURI));
 
-        // 검색 기능 구현을 위한 변수 선언
-        EditText word = view.findViewById(R.id.searchText);
-        ImageButton submit = view.findViewById(R.id.imageButton);
-        Switch mode = view.findViewById(R.id.switchMode);
-        TextView sgWord = view.findViewById(R.id.suggestion);
+        // view 설정
+        word = view.findViewById(R.id.searchText);
+        submit = view.findViewById(R.id.imageButton);
+        mode = view.findViewById(R.id.switchMode);
+        sgWord = view.findViewById(R.id.suggestion);
+
+        adapter = new RecyclerAdapter();
+        recyclerView.setAdapter(adapter);
 
         // Image Button 비활성화 여부 결정
         do{

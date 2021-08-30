@@ -48,6 +48,12 @@
 <!--        app:layout_constraintTop_toTopOf="parent" />-->
 
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <FrameLayout
         android:id="@+id/frame_layout"
         android:layout_width="match_parent"

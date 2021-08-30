@@ -25,12 +25,11 @@ import java.util.Map;
 public class Pcm2Text {
 
     private static final String TAG = "PCM2TEXT";
-    private static final String MYKEY = "2d40b072-37f1-4317-9899-33e0b3f5fb90";
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    protected String pcm2text(String language, String audioPath) {
+    protected String pcm2text(String language, String audioPath, String key) {
         String openApiURL = "http://aiopen.etri.re.kr:8000/WiseASR/Recognition";
-        String accessKey = MYKEY;
+        String accessKey = key;
         String languageCode = language;
         String audioFilePath = audioPath;
         String audioContents = null;

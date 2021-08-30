@@ -24,13 +24,9 @@ public class FileWrite {
     public String create() {
         try {
             File path = con.getFilesDir();
-            Log.d(TAG, "FILE PATH : " + path);
-
             file = new File(path, fileName);
-            if (!file.exists())
-                file.createNewFile();
-
-            Log.d(TAG, "return message : "+path+"/"+fileName);
+            if (file.exists())      file.delete();
+            file.createNewFile();
             return path+"/"+fileName;
         }
         catch(Exception e) {
