@@ -37,12 +37,14 @@ public class FileWrite {
     }
 
     // path의 파일에 내용을 쓰는 함수
-    public void write(String content, String path) {
+    public void write(String content, String path, boolean isFirst) {
         FileWriter writer;
         File file = new File(path);
         try {
             writer = new FileWriter(file, true);
-            writer.write("\n" + content);
+            if(!isFirst)
+                writer.write("\n");
+            writer.write(content);
             writer.flush();
             writer.close();
         }

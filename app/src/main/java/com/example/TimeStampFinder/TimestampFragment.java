@@ -1,8 +1,6 @@
 package com.example.TimeStampFinder;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -11,14 +9,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.SearchView;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
@@ -26,13 +21,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
-import static android.content.ContentValues.TAG;
 import static java.lang.Thread.sleep;
 
 public class TimestampFragment extends Fragment {
@@ -51,6 +46,13 @@ public class TimestampFragment extends Fragment {
     private ImageButton submit;
     private Switch mode;
     private TextView sgWord;
+    private TextView info;
+    private ProgressBar progress;
+
+    private Context context;
+
+    private int threadNum = 5;
+    private int progValue = 0;
 
     // txtFile의 완성 여부 확인
     public static void setFin(){ isFin = true; }
@@ -80,10 +82,9 @@ public class TimestampFragment extends Fragment {
         Bundle bundle = getArguments();
         fileURI = bundle.getString("fileURI");
         txtName = bundle.getString("txtName");
-        txtPath = bundle.getString("txtPath");
 
         Log.d(TAG, "RESULT frag : " + fileURI);
-        Log.d(TAG, "Text Path " + txtPath);
+        Log.d(TAG, "TXT NAME " + txtName);
     }
 
     @Override
@@ -103,29 +104,60 @@ public class TimestampFragment extends Fragment {
         submit = view.findViewById(R.id.imageButton);
         mode = view.findViewById(R.id.switchMode);
         sgWord = view.findViewById(R.id.suggestion);
+        info = view.findViewById(R.id.infoTextView);
+        progress = view.findViewById(R.id.progressBar);
 
         adapter = new RecyclerAdapter();
         recyclerView.setAdapter(adapter);
 
-        // Image Button 비활성화 여부 결정
-        do{
-            try{
-                sleep(1000);
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-        }while(!isFin);
-        submit.setEnabled(true);
+        submit.setEnabled(false);
+        sgWord.setText("파일 읽는 중...");
+
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        context = getActivity().getApplicationContext();
+
+        // 파일 분할이 들어올 자리
+        int audioNum = 12;
+
+        // STT
+        // 빈 파일 생성, 경로만 미리 가져오기
+        int i;
+        int asyncNum = audioNum/threadNum;
+        SttAsync[] stt = new SttAsync[threadNum];
+        String[] tempFilePath = new String[threadNum];
+        ExecutorService manage = Executors.newSingleThreadExecutor();
+        ExecutorService pool = Executors.newFixedThreadPool(threadNum);
+        
+        FileWrite fw = new FileWrite(txtName, context);         // 통합 txt
+        txtPath = fw.create();
+
+        // 각 스레드에 대해
+        for(i = 0; i<threadNum; i++){
+            FileWrite temp = new FileWrite(i+"temp.txt", context);
+            tempFilePath[i] = temp.create();
+
+            int audioStart = i*asyncNum;
+            int audioEnd = (i==threadNum-1)?audioNum-1:(i+1)*asyncNum-1;
+
+            stt[i] = new SttAsync(i,audioStart, audioEnd, temp, tempFilePath[i]);
+            stt[i].executeOnExecutor(pool);
+        }
+        pool.shutdown();
+        
+        // 통합 파일로 저장
+        new SttManage().executeOnExecutor(manage, threadNum, fw, tempFilePath, pool);
+        manage.shutdown();
 
         // suggest 구현
         new Thread() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             public void run() {
-                try {
-                    sgWord.setText(SuggestWord.suggest(txtPath));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
             }
         }.start();
 
@@ -161,7 +193,94 @@ public class TimestampFragment extends Fragment {
                 }
             }
         }));
+    }
 
-        return view;
+    public class SttAsync extends AsyncTask<Object, Integer, Integer>{
+
+        private final String TAG = "STTASYNC";
+
+        private int keyNum;
+        private int startNum;
+        private int endNum;
+        private FileWrite fw;
+        private String filePath;
+
+        private String audioPath = "/storage/emulated/0/Music/";
+
+        String keys[] = {"2d40b072-37f1-4317-9899-33e0b3f5fb90"};
+
+        public SttAsync(int keyNum, int startNum, int endNum, FileWrite fw, String filePath){
+            this.startNum = startNum;
+            this.endNum = endNum;
+            this.fw = fw;
+            this.filePath = filePath;
+            this.keyNum = keyNum;
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        @Override
+        protected Integer doInBackground(Object... objects) {
+            progValue+=5;
+            publishProgress();
+            for (int i=startNum; i<=endNum; i++){
+                String content = new Pcm2Text().pcm2text("korean", audioPath+i+"get.wav", keys[0]);
+                if(i==startNum)
+                    fw.write(i+"\n"+content, filePath, true);
+                else
+                    fw.write(i+"\n"+content, filePath, false);
+                progValue+=5;
+                publishProgress();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... integers){
+            progress.setProgress(progValue);
+        }
+    }
+
+    public class SttManage extends AsyncTask<Object, Integer, Integer>{
+
+        @Override
+        protected Integer doInBackground(Object... objects){
+            int threadNum = (int)objects[0];
+            FileWrite fw = (FileWrite)objects[1];
+            String tempFilePath[] = (String[])objects[2];
+            ExecutorService pool = (ExecutorService)objects[3];
+
+            // 스레드 작업이 모두 끝나면
+            do{}while(!pool.isTerminated());
+            progValue+=25;
+            publishProgress();
+
+            for(int i = 0; i<threadNum; i++){
+                String str = FileWrite.read(tempFilePath[i]);
+                Log.d(TAG, str);
+                fw.write(str, txtPath, true);
+                progValue+=5;
+                publishProgress();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... integers){
+            progress.setProgress(progValue);
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        protected void onPostExecute(Integer result){
+            // suggest
+            try {
+                sgWord.setText(SuggestWord.suggest(txtPath));
+                info.setText("를 검색해보세요!");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            submit.setEnabled(true);
+        }
     }
 }

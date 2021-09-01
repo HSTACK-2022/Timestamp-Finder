@@ -52,20 +52,25 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.1"
+                android:text=" " />
+
+            <TextView
                 android:id="@+id/suggestion"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="6"
-                android:text="TextView"
                 android:textAlignment="gravity"
                 android:textColor="@color/purple_700" />
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/infoTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="4"
-                android:text="를 검색해보세요!" />
+                android:layout_weight="4" />
 
             <Switch
                 android:id="@+id/switchMode"
@@ -78,6 +83,13 @@
                 android:textSize="12sp" />
 
         </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
