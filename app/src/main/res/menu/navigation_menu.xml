@@ -7,20 +7,20 @@
         android:icon="@drawable/word"
         android:enabled="true"
         android:checked="true"
-        android:title="단어" />
+        android:title="WORD" />
 
     <item
         android:id="@+id/tab2"
         app:showAsAction="always"
         android:icon="@drawable/image"
         android:enabled="true"
-        android:title="이미지"/>
+        android:title="IMAGE"/>
 
     <item
         android:id="@+id/tab3"
         app:showAsAction="always"
         android:icon="@drawable/home"
         android:enabled="true"
-        android:title="home"/>
+        android:title="HOME"/>
 
 </menu>

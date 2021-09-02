@@ -27,6 +27,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Thread.sleep;
 
@@ -193,8 +194,12 @@ public class TimestampFragment extends Fragment {
                 }
             }
         }));
+
+        // videocut test
+        //new VideoCut().execute();
     }
 
+    // 파일을 분할해 각 스레드로 보내는 SttAsync
     public class SttAsync extends AsyncTask<Object, Integer, Integer>{
 
         private final String TAG = "STTASYNC";
@@ -223,11 +228,13 @@ public class TimestampFragment extends Fragment {
             progValue+=5;
             publishProgress();
             for (int i=startNum; i<=endNum; i++){
+                // num %2d로 처리
+                String numStr = Integer.toString(i);
+                if(i<10)    numStr = "0"+ Integer.toString(i);
                 String content = new Pcm2Text().pcm2text("korean", audioPath+i+"get.wav", keys[0]);
-                if(i==startNum)
-                    fw.write(i+"\n"+content, filePath, true);
-                else
-                    fw.write(i+"\n"+content, filePath, false);
+                // 단어와 Content 함께 기록
+                if(i==startNum) fw.write(numStr+"\n"+content, filePath, true);
+                else            fw.write(numStr+"\n"+content, filePath, false);
                 progValue+=5;
                 publishProgress();
             }
@@ -240,26 +247,35 @@ public class TimestampFragment extends Fragment {
         }
     }
 
-    public class SttManage extends AsyncTask<Object, Integer, Integer>{
+    // 여러개의 SttAsync을 돌린 뒤 취합하는 스레드
+    public class SttManage extends AsyncTask<Object, Integer, Void>{
 
         @Override
-        protected Integer doInBackground(Object... objects){
+        protected Void doInBackground(Object... objects){
             int threadNum = (int)objects[0];
             FileWrite fw = (FileWrite)objects[1];
             String tempFilePath[] = (String[])objects[2];
             ExecutorService pool = (ExecutorService)objects[3];
 
             // 스레드 작업이 모두 끝나면
-            do{}while(!pool.isTerminated());
-            progValue+=25;
-            publishProgress();
+            //do{}while(!pool.isTerminated());
+            try{
+                boolean check = pool.awaitTermination(60, TimeUnit.SECONDS);
+                if(check){
+                    progValue+=25;
+                    publishProgress();
 
-            for(int i = 0; i<threadNum; i++){
-                String str = FileWrite.read(tempFilePath[i]);
-                Log.d(TAG, str);
-                fw.write(str, txtPath, true);
-                progValue+=5;
-                publishProgress();
+                    for(int i = 0; i<threadNum; i++){
+                        String str = FileWrite.read(tempFilePath[i]);
+                        Log.d(TAG, str);
+                        fw.write(str, txtPath, true);
+                        progValue+=5;
+                        publishProgress();
+                    }
+                }
+            }
+            catch(InterruptedException e){
+
             }
             return null;
         }
@@ -271,7 +287,7 @@ public class TimestampFragment extends Fragment {
 
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
-        protected void onPostExecute(Integer result){
+        protected void onPostExecute(Void v){
             // suggest
             try {
                 sgWord.setText(SuggestWord.suggest(txtPath));

@@ -63,6 +63,8 @@
         android:layout_width="match_parent"
         android:layout_height="15dp"
         android:layout_weight="1"
+        app:itemRippleColor="@color/white"
+        app:itemTextColor="#FFFFFF"
         app:menu="@menu/navigation_menu" />
 
 <!--    <fragment-->

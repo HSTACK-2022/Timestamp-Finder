@@ -63,10 +63,13 @@ android {
         }
     }*/
     packagingOptions {
-        pickFirst 'libs/armeabi-v7a/sample-ffmpeg.so'
-        pickFirst 'libs/arm64-v8a/sample-ffmpeg.so'
-        pickFirst 'libs/x86/sample-ffmpeg.so'
-        pickFirst 'libs/x86_64/sample-ffmpeg.so'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude 'build.xml'
     }
 
 }
@@ -76,10 +79,12 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation project(path: ':sdk')
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'androidx.fragment:fragment-ktx:1.3.2'
+
 }
