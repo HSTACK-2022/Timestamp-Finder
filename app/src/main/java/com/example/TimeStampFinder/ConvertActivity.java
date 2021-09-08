@@ -4,12 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.OpenableColumns;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
@@ -31,6 +33,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -48,6 +52,7 @@ public class ConvertActivity extends AppCompatActivity {
     private Fragment iFragment = new StreamFragment();
 
     private String fileURI;
+    private Uri uriFilePath;
     private String txtName;
     private boolean isFull;         // 전체화면 여부를 받기 위한 변수
 
@@ -66,18 +71,25 @@ public class ConvertActivity extends AppCompatActivity {
         super.onStart();
         Intent intent = getIntent();
         fileURI = (String)intent.getSerializableExtra("fileURI");
+        uriFilePath = Uri.parse(fileURI);
         txtName = (String)intent.getSerializableExtra("txtName");
         //setResult(RESULT_OK, intent);
 
+
+
         // 방법이 없을까?
         new Thread(){
+
             public void run(){
                 // 비디오를 음원파일로 변경
                 String filepath;
                 try {
                     Log.d(TAG, Environment.getExternalStorageDirectory().getAbsolutePath());
-                    filepath = new File(fileURI).getCanonicalPath();
-                    new NDK().scanning(filepath);
+                    filepath = new File(String.valueOf(fileURI)).getCanonicalPath();
+
+
+
+                    //new NDK().scanning(filepath);
                     //new NDK().decode_audio("/storage/emulated/0/Movies/hello.wav", "/storage/emulated/0/Movies/hello.mp3")
                     //new NDK().decode_video("/storage/emulated/0/Movies/videoplayback.mp4", "/storage/emulated/0/Movies/videoplayback.wav");
                     Log.d(TAG, "DECODE_AUDIO : TRUE");
@@ -115,6 +127,8 @@ public class ConvertActivity extends AppCompatActivity {
         Log.d(TAG, "Video Length : "+TimestampFragment.videoLength(fileURI));
 
     }
+
+
 
     public void show(int n)
     {
@@ -198,4 +212,6 @@ public class ConvertActivity extends AppCompatActivity {
 
         }
     }
+
+
 }
