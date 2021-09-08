@@ -1,10 +1,13 @@
 package com.example.TimeStampFinder;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +23,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -117,13 +127,49 @@ public class TimestampFragment extends Fragment {
         return view;
     }
 
+    //video 이름과 같은 wav 파일 이름 및 경로 알아내기 (파일 생성 X)
+    private String getAudioFilePath(String fileName){
+
+        int cut = fileName.lastIndexOf('/');
+        if (cut != -1) {
+            fileName = fileName.substring(cut + 1);
+        }
+        fileName = fileName.substring(0,fileName.length()-4);
+        String audio_name = fileName+".wav";
+        String audio_path = context.getFilesDir()+"/"+audio_name;
+        File wav = new File(audio_path);
+
+        if(wav.exists())   wav.delete();
+        return audio_path;
+    }
+
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         context = getActivity().getApplicationContext();
 
+
+
+        //0906-minHwa "ConverActivity 수정, AudioExtractor, SplitAudio 추가"
+        // 1. video 이름과 같은 wav 파일 이름 및 경로 알아내기(파일 생성 X)
+        // ex) chicken.mp4 -> chicken.wav
+        int audioNum;
+        String audiopath = getAudioFilePath(fileURI);
+        // 2. extract Audio Stream(wav < 16bit 16kHz mono >) from Video(mp4)
+        //Log.d("AUDIOPATH","new audio file path = "+audiopath);
+        //Log.d("AUDIOPATH",fileURI);
+        new AudioExtractor().useFfmpeg(fileURI,audiopath); // mp4경로, wav경로
+
+        // 3. wav 파일 쪼개기
+        //  wav -> 10sec씩 pcm 파일로 쪼개기 (파일명은 1.pcm, 2.pcm, ...)
+        File wav = new File(audiopath);   // audio_path = wav 파일 경로
+        audioNum = new SplitAudio().splitWav2Pcm(wav,10, context); // wav, 원하는 시간 단위, context
+        // 여기까지 수정
+
+
         // 파일 분할이 들어올 자리
-        int audioNum = 12;
+
 
         // STT
         // 빈 파일 생성, 경로만 미리 가져오기
@@ -133,7 +179,7 @@ public class TimestampFragment extends Fragment {
         String[] tempFilePath = new String[threadNum];
         ExecutorService manage = Executors.newSingleThreadExecutor();
         ExecutorService pool = Executors.newFixedThreadPool(threadNum);
-        
+
         FileWrite fw = new FileWrite(txtName, context);         // 통합 txt
         txtPath = fw.create();
 
@@ -149,9 +195,9 @@ public class TimestampFragment extends Fragment {
             stt[i].executeOnExecutor(pool);
         }
         pool.shutdown();
-        
+
         // 통합 파일로 저장
-        new SttManage().executeOnExecutor(manage, threadNum, fw, tempFilePath, pool);
+//        new SttManage().executeOnExecutor(manage, threadNum, fw, tempFilePath, pool);
         manage.shutdown();
 
         // suggest 구현
@@ -208,11 +254,10 @@ public class TimestampFragment extends Fragment {
         private int startNum;
         private int endNum;
         private FileWrite fw;
-        private String filePath;
+        private final String filePath;
+        private String audioPath = context.getFilesDir()+"/";
 
-        private String audioPath = "/storage/emulated/0/Music/";
-
-        String keys[] = {"2d40b072-37f1-4317-9899-33e0b3f5fb90"};
+        String[] keys = {"2d40b072-37f1-4317-9899-33e0b3f5fb90","80ff5736-f813-4686-aca6-472739d8ebe0","25833dd1-e685-4f13-adc6-c85341d1bac5"};
 
         public SttAsync(int keyNum, int startNum, int endNum, FileWrite fw, String filePath){
             this.startNum = startNum;
@@ -230,8 +275,7 @@ public class TimestampFragment extends Fragment {
             for (int i=startNum; i<=endNum; i++){
                 // num %2d로 처리
                 String numStr = Integer.toString(i);
-                if(i<10)    numStr = "0"+ Integer.toString(i);
-                String content = new Pcm2Text().pcm2text("korean", audioPath+i+"get.wav", keys[0]);
+                String content = new Pcm2Text().pcm2text(audioPath+i+".pcm", keys[i/3]);
                 // 단어와 Content 함께 기록
                 if(i==startNum) fw.write(numStr+"\n"+content, filePath, true);
                 else            fw.write(numStr+"\n"+content, filePath, false);
@@ -267,7 +311,7 @@ public class TimestampFragment extends Fragment {
 
                     for(int i = 0; i<threadNum; i++){
                         String str = FileWrite.read(tempFilePath[i]);
-                        Log.d(TAG, str);
+                        Log.d(TAG, tempFilePath[i]+": "+str);
                         fw.write(str, txtPath, true);
                         progValue+=5;
                         publishProgress();

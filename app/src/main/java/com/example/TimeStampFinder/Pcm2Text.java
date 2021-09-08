@@ -27,11 +27,9 @@ public class Pcm2Text {
     private static final String TAG = "PCM2TEXT";
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    protected String pcm2text(String language, String audioPath, String key) {
+    protected String pcm2text(String audioFilePath, String accessKey) {
         String openApiURL = "http://aiopen.etri.re.kr:8000/WiseASR/Recognition";
-        String accessKey = key;
-        String languageCode = language;
-        String audioFilePath = audioPath;
+        String languageCode = "korean";
         String audioContents = null;
 
         Gson gson = new Gson();
@@ -70,7 +68,7 @@ public class Pcm2Text {
             if (responseCode == 200) {
                 InputStream is = new BufferedInputStream(con.getInputStream());
                 responBody = readStream(is);
-                String splits[] = responBody.split("\"");
+                String[] splits = responBody.split("\"");
                 Log.d(TAG, "RESULT: "+splits[7]);
                 return splits[7];
             } else{
