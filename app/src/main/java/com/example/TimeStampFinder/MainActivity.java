@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "fileURI : " + fileURI);
 
             // 사용자의 file을 바탕으로 textfile의 fileName 설정
-            String[] getTxtName = getFileNameFromUri(selectedfile).split(".wav");
+            String[] getTxtName = getFileNameFromUri(selectedfile).split(".mp4");
             txtName = getTxtName[0] + ".txt";
             Log.d(TAG, "FILE SPLIT : " + txtName);
 

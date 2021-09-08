@@ -68,6 +68,22 @@ public class TimestampFragment extends Fragment {
     // txtFile의 완성 여부 확인
     public static void setFin(){ isFin = true; }
 
+    //video 이름과 같은 wav 파일 이름 및 경로 알아내기 (파일 생성 X)
+    private String getAudioFilePath(String fileName){
+
+        int cut = fileName.lastIndexOf('/');
+        if (cut != -1) {
+            fileName = fileName.substring(cut + 1);
+        }
+        fileName = fileName.substring(0,fileName.length()-4);
+        String audio_name = fileName+".wav";
+        String audio_path = context.getFilesDir()+"/"+audio_name;
+        File wav = new File(audio_path);
+
+        if(wav.exists())   wav.delete();
+        return audio_path;
+    }
+
     // 영상 길이를 확인하기 위한 함수
     public static String videoLength(String fileURI){
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
@@ -127,86 +143,17 @@ public class TimestampFragment extends Fragment {
         return view;
     }
 
-    //video 이름과 같은 wav 파일 이름 및 경로 알아내기 (파일 생성 X)
-    private String getAudioFilePath(String fileName){
-
-        int cut = fileName.lastIndexOf('/');
-        if (cut != -1) {
-            fileName = fileName.substring(cut + 1);
-        }
-        fileName = fileName.substring(0,fileName.length()-4);
-        String audio_name = fileName+".wav";
-        String audio_path = context.getFilesDir()+"/"+audio_name;
-        File wav = new File(audio_path);
-
-        if(wav.exists())   wav.delete();
-        return audio_path;
-    }
-
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         context = getActivity().getApplicationContext();
 
-
-
-        //0906-minHwa "ConverActivity 수정, AudioExtractor, SplitAudio 추가"
-        // 1. video 이름과 같은 wav 파일 이름 및 경로 알아내기(파일 생성 X)
-        // ex) chicken.mp4 -> chicken.wav
-        int audioNum;
-        String audiopath = getAudioFilePath(fileURI);
-        // 2. extract Audio Stream(wav < 16bit 16kHz mono >) from Video(mp4)
-        //Log.d("AUDIOPATH","new audio file path = "+audiopath);
-        //Log.d("AUDIOPATH",fileURI);
-        new AudioExtractor().useFfmpeg(fileURI,audiopath); // mp4경로, wav경로
-
-        // 3. wav 파일 쪼개기
-        //  wav -> 10sec씩 pcm 파일로 쪼개기 (파일명은 1.pcm, 2.pcm, ...)
-        File wav = new File(audiopath);   // audio_path = wav 파일 경로
-        audioNum = new SplitAudio().splitWav2Pcm(wav,10, context); // wav, 원하는 시간 단위, context
-        // 여기까지 수정
-
-
-        // 파일 분할이 들어올 자리
-
-
         // STT
         // 빈 파일 생성, 경로만 미리 가져오기
-        int i;
-        int asyncNum = audioNum/threadNum;
-        SttAsync[] stt = new SttAsync[threadNum];
-        String[] tempFilePath = new String[threadNum];
-        ExecutorService manage = Executors.newSingleThreadExecutor();
-        ExecutorService pool = Executors.newFixedThreadPool(threadNum);
 
-        FileWrite fw = new FileWrite(txtName, context);         // 통합 txt
-        txtPath = fw.create();
+        ExecutorService split = Executors.newSingleThreadExecutor();
 
-        // 각 스레드에 대해
-        for(i = 0; i<threadNum; i++){
-            FileWrite temp = new FileWrite(i+"temp.txt", context);
-            tempFilePath[i] = temp.create();
-
-            int audioStart = i*asyncNum;
-            int audioEnd = (i==threadNum-1)?audioNum-1:(i+1)*asyncNum-1;
-
-            stt[i] = new SttAsync(i,audioStart, audioEnd, temp, tempFilePath[i]);
-            stt[i].executeOnExecutor(pool);
-        }
-        pool.shutdown();
-
-        // 통합 파일로 저장
-//        new SttManage().executeOnExecutor(manage, threadNum, fw, tempFilePath, pool);
-        manage.shutdown();
-
-        // suggest 구현
-        new Thread() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
-            public void run() {
-
-            }
-        }.start();
+        new SplitAsync().executeOnExecutor(split);
 
         // search 구현
         // submit 이미지 버튼을 클릭하면 검색이 시작된다.
@@ -245,6 +192,63 @@ public class TimestampFragment extends Fragment {
         //new VideoCut().execute();
     }
 
+    // 파일 분할을 위한 Async
+    public class SplitAsync extends AsyncTask<Object, Integer, Integer>{
+
+        @Override
+        protected Integer doInBackground(Object... objects) {
+            int audioNum;
+            String audiopath = getAudioFilePath(fileURI);
+            // 2. extract Audio Stream(wav < 16bit 16kHz mono >) from Video(mp4)
+            //Log.d("AUDIOPATH","new audio file path = "+audiopath);
+            //Log.d("AUDIOPATH",fileURI);
+            new AudioExtractor().useFfmpeg(fileURI,audiopath); // mp4경로, wav경로
+
+            // 3. wav 파일 쪼개기
+            //  wav -> 10sec씩 pcm 파일로 쪼개기 (파일명은 1.pcm, 2.pcm, ...)
+            File wav = new File(audiopath);   // audio_path = wav 파일 경로
+            audioNum = new SplitAudio().splitWav2Pcm(wav,10, context);
+
+            progValue += 10;
+
+            return audioNum;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... integers){
+            progress.setProgress(progValue);
+        }
+
+        @Override
+        protected void onPostExecute(Integer audioNum) {
+            int asyncNum = audioNum/threadNum;
+            SttAsync[] stt = new SttAsync[threadNum];
+            String[] tempFilePath = new String[threadNum];
+            ExecutorService manage = Executors.newSingleThreadExecutor();
+            ExecutorService pool = Executors.newFixedThreadPool(threadNum);
+
+            FileWrite fw = new FileWrite(txtName, context);         // 통합 txt
+            txtPath = fw.create();
+
+            // 각 스레드에 대해
+            for(int i = 0; i<threadNum; i++){
+                FileWrite temp = new FileWrite(i+"temp.txt", context);
+                tempFilePath[i] = temp.create();
+
+                int audioStart = i*asyncNum;
+                int audioEnd = (i==threadNum-1)?audioNum-1:(i+1)*asyncNum-1;
+
+                stt[i] = new SttAsync(i, audioStart, audioEnd, temp, tempFilePath[i]);
+                stt[i].executeOnExecutor(pool);
+            }
+            pool.shutdown();
+
+            // 통합 파일로 저장
+            new SttManage().executeOnExecutor(manage, threadNum, fw, tempFilePath, pool);
+            manage.shutdown();
+        }
+    }
+
     // 파일을 분할해 각 스레드로 보내는 SttAsync
     public class SttAsync extends AsyncTask<Object, Integer, Integer>{
 
@@ -275,7 +279,7 @@ public class TimestampFragment extends Fragment {
             for (int i=startNum; i<=endNum; i++){
                 // num %2d로 처리
                 String numStr = Integer.toString(i);
-                String content = new Pcm2Text().pcm2text(audioPath+i+".pcm", keys[i/3]);
+                String content = new Pcm2Text().pcm2text(audioPath+i+".pcm", keys[i%3]);
                 // 단어와 Content 함께 기록
                 if(i==startNum) fw.write(numStr+"\n"+content, filePath, true);
                 else            fw.write(numStr+"\n"+content, filePath, false);
@@ -302,11 +306,10 @@ public class TimestampFragment extends Fragment {
             ExecutorService pool = (ExecutorService)objects[3];
 
             // 스레드 작업이 모두 끝나면
-            //do{}while(!pool.isTerminated());
             try{
                 boolean check = pool.awaitTermination(60, TimeUnit.SECONDS);
                 if(check){
-                    progValue+=25;
+                    progValue+=15;
                     publishProgress();
 
                     for(int i = 0; i<threadNum; i++){
