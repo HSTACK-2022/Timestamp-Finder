@@ -29,19 +29,11 @@ public class AudioExtractor {
         session = FFmpegKit.execute("-i '" + input + "' -acodec pcm_s16le -ac 1 -ar 16000 '" + output + "'");
 
         if (ReturnCode.isSuccess(session.getReturnCode())) {
-
-            // SUCCESS
-            Log.d(TAG, "FFMPEG SUCCESS");
-
+            Log.d(TAG, "FFMPEG SUCCESS");            // SUCCESS
         } else if (ReturnCode.isCancel(session.getReturnCode())) {
-
-            // CANCEL
-
         } else {
-
             // FAILURE
             Log.d(TAG, String.format("Command failed with state %s and rc %s.%s", session.getState(), session.getReturnCode(), session.getFailStackTrace()));
-
         }
     }
 }

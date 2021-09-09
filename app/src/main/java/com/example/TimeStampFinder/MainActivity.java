@@ -28,8 +28,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MAIN";
     private String fileURI;         // 불러올 영상의 Uri
     private String txtName;         // text file은 영상당 하나로 제한
-    private String txtPath;         // text file에 저장 뒤 경로 전달
-
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -45,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 지금은 */*으로 모든 파일을 허용했으나, 후에 audio/x-wav로 wav파일로 제한 필요
-                Intent intent = new Intent().setType("*/*").setAction(Intent.ACTION_GET_CONTENT);
+                // mpeg 비디오 파일만 불러오도록 설정
+                Intent intent = new Intent().setType("video/*").setAction(Intent.ACTION_GET_CONTENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 startActivityForResult(Intent.createChooser(intent, "Select a file"), REQ_CODE);
             }
@@ -84,8 +82,8 @@ public class MainActivity extends AppCompatActivity {
 
             //파일이 선택되면 두번째 activity로 넘기기(txt파일 생성)
             Intent intent = new Intent(getBaseContext(), ConvertActivity.class);
-            intent.putExtra("fileURI",fileURI);
-            intent.putExtra("txtName", txtName);
+            intent.putExtra("fileURI",fileURI);     // 영상 파일의 URI
+            intent.putExtra("txtName", txtName);    // 통합 txt 파일
             startActivityForResult(intent, 1000);
 
         }

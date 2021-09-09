@@ -218,12 +218,12 @@ public class TimestampFragment extends Fragment {
             ExecutorService pool = Executors.newFixedThreadPool(threadNum); // 멀티스레드를 병렬 실행, 관리할 스레드 풀
 
             FileWrite fw = new FileWrite(txtName, context);         // 통합 txt
-            txtPath = fw.create();
+            txtPath = fw.create(false);
 
             // 각 스레드에 대해
             for(int i = 0; i<threadNum; i++){
                 FileWrite temp = new FileWrite("temp"+i+".txt", context);
-                tempFilePath[i] = temp.create();
+                tempFilePath[i] = temp.create(true);
 
                 int audioStart = i*asyncNum;
                 int audioEnd = (i==threadNum-1)?audioNum-1:(i+1)*asyncNum-1;        // 오디오 파일의 끝이면 마지막 번호 return
@@ -249,7 +249,7 @@ public class TimestampFragment extends Fragment {
         private int endNum;
         private FileWrite fw;
         private final String filePath;
-        private String audioPath = context.getFilesDir()+"/";
+        private String audioPath = context.getCacheDir()+"/";
 
         String[] keys = {"2d40b072-37f1-4317-9899-33e0b3f5fb90","80ff5736-f813-4686-aca6-472739d8ebe0","25833dd1-e685-4f13-adc6-c85341d1bac5",
                 "40c498a8-7d33-4909-9b60-427b3d0ccf8b", "0913ccd7-0cd1-4455-8b60-7940aa54f7be"};

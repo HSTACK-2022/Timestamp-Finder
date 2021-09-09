@@ -1,17 +1,11 @@
 package com.example.TimeStampFinder;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.database.Cursor;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.OpenableColumns;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
@@ -21,7 +15,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.MediaController;
-import android.widget.ProgressBar;
 import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
@@ -32,14 +25,6 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static android.content.ContentValues.TAG;
-import static java.lang.Thread.sleep;
 
 public class ConvertActivity extends AppCompatActivity {
 
@@ -75,34 +60,11 @@ public class ConvertActivity extends AppCompatActivity {
         txtName = (String)intent.getSerializableExtra("txtName");
         //setResult(RESULT_OK, intent);
 
-
-
-        // 방법이 없을까?
-        new Thread(){
-
-            public void run(){
-                // 비디오를 음원파일로 변경
-                String filepath;
-                try {
-                    Log.d(TAG, Environment.getExternalStorageDirectory().getAbsolutePath());
-                    filepath = new File(String.valueOf(fileURI)).getCanonicalPath();
-
-
-
-                    //new NDK().scanning(filepath);
-                    //new NDK().decode_audio("/storage/emulated/0/Movies/hello.wav", "/storage/emulated/0/Movies/hello.mp3")
-                    //new NDK().decode_video("/storage/emulated/0/Movies/videoplayback.mp4", "/storage/emulated/0/Movies/videoplayback.wav");
-                    Log.d(TAG, "DECODE_AUDIO : TRUE");
-                } catch (IOException e) {
-                    Log.e("FFmpegForAndroid", "", e);
-                }
-            }
-        }.start();
-
         Bundle bundle = new Bundle();
         bundle.putString("fileURI", fileURI);
         bundle.putString("txtName", txtName);
         wFragment.setArguments(bundle);
+        iFragment.setArguments(bundle);
 
         isFull = false;
         layout = findViewById(R.id.videoview_frame);
@@ -125,10 +87,14 @@ public class ConvertActivity extends AppCompatActivity {
 
         //영상 길이 알아내기
         Log.d(TAG, "Video Length : "+TimestampFragment.videoLength(fileURI));
-
     }
 
-
+    // Convert Activity 종료시 cache 파일 비우기
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        clearCache();
+    }
 
     public void show(int n)
     {
@@ -213,5 +179,25 @@ public class ConvertActivity extends AppCompatActivity {
         }
     }
 
+    private void clearCache() {
+        final File cacheDirFile = this.getCacheDir();
+        if (null != cacheDirFile && cacheDirFile.isDirectory()) {
+            clearSubCacheFiles(cacheDirFile);
+        }
+    }
 
+    private void clearSubCacheFiles(File cacheDirFile) {
+        if (null == cacheDirFile || cacheDirFile.isFile()) {
+            return;
+        }
+        for (File cacheFile : cacheDirFile.listFiles()) {
+            if (cacheFile.isFile()) {
+                if (cacheFile.exists()) {
+                    cacheFile.delete();
+                }
+            } else {
+                clearSubCacheFiles(cacheFile);
+            }
+        }
+    }
 }

@@ -21,9 +21,11 @@ public class FileWrite {
     }
 
     // 빈 파일을 하나 만들어 경로를 리턴하는 함수
-    public String create() {
+    public String create(boolean isCache) {
         try {
-            File path = con.getFilesDir();
+            File path;
+            if(isCache) path = con.getCacheDir();
+            else        path = con.getFilesDir();
             file = new File(path, fileName);
             if (file.exists())      file.delete();
             file.createNewFile();

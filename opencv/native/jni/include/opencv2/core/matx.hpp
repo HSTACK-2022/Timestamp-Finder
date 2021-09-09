@@ -1369,7 +1369,7 @@ Vec<_Tp, cn> operator + (const Vec<_Tp, cn>& a, const Vec<_Tp, cn>& b)
 }
 
 template<typename _Tp, int cn> static inline
-Vec<_Tp, cn> operator - (const Vec<_Tp, cn>& a, const Vec<_Tp, cn>& b)
+Vec<_Tp, cn>& operator - (const Vec<_Tp, cn>& a, const Vec<_Tp, cn>& b)
 {
     return Vec<_Tp, cn>(a, b, Matx_SubOp());
 }

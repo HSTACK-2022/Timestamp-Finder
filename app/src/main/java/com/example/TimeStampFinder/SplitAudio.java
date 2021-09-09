@@ -32,7 +32,7 @@ public class SplitAudio {
                 fosize+=splitunit;
                 // file 만들고
                 newFileName = (count - 1) +".pcm";
-                newFilePath = new FileWrite(newFileName, con).create();
+                newFilePath = new FileWrite(newFileName, con).create(true);
                 // part 배열을 만든 file에 저장
                 out = new FileOutputStream(newFilePath);
                 out.write(part);
@@ -41,7 +41,7 @@ public class SplitAudio {
             //int n = in.read(part,0,avg-fosize);
             int remain = in.read(part,0,(int)(wavFile.length()-44)-fosize);
             newFileName = (count - 1) +".pcm";
-            newFilePath = new FileWrite(newFileName, con).create();
+            newFilePath = new FileWrite(newFileName, con).create(true);
             out = new FileOutputStream(newFilePath);
             out.write(part,0, remain);
 
