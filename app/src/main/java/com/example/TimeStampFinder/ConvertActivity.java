@@ -3,6 +3,7 @@ package com.example.TimeStampFinder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -41,6 +42,17 @@ public class ConvertActivity extends AppCompatActivity {
     private String txtName;
     private boolean isFull;         // 전체화면 여부를 받기 위한 변수
 
+    // 영상 길이를 확인하기 위한 함수
+    public static int videoLength(String fileURI){
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(fileURI);
+
+        String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        long timeInmillisec = Long.parseLong(time); //예시로 7531 이면
+        long duration = timeInmillisec / 1000; // 7.531 초
+        return (int)duration;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +75,7 @@ public class ConvertActivity extends AppCompatActivity {
         Bundle bundle = new Bundle();
         bundle.putString("fileURI", fileURI);
         bundle.putString("txtName", txtName);
+        bundle.putInt("fileLength", videoLength(fileURI));
         wFragment.setArguments(bundle);
         iFragment.setArguments(bundle);
 
@@ -86,7 +99,7 @@ public class ConvertActivity extends AppCompatActivity {
         show(0);
 
         //영상 길이 알아내기
-        Log.d(TAG, "Video Length : "+TimestampFragment.videoLength(fileURI));
+        Log.d(TAG, "Video Length : " + videoLength(fileURI)+"sec.");
     }
 
     // Convert Activity 종료시 cache 파일 비우기

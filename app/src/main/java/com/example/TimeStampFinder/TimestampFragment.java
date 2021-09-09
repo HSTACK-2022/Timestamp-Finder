@@ -81,23 +81,6 @@ public class TimestampFragment extends Fragment {
         return audio_path;
     }
 
-    // 영상 길이를 확인하기 위한 함수
-    public static String videoLength(String fileURI){
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(fileURI);
-
-        String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-        long timeInmillisec = Long.parseLong(time); //예시로 7531 이면
-        long duration = timeInmillisec / 1000; // 7.531 초
-        long hours = duration / 3600;
-        //long hours = TimeUnit.MILLISECONDS.toHours(timeInmillisec); 위랑 동일. TimeUnit 함수 쓴 것 뿐
-        long minutes = (duration - hours * 3600) / 60; // 1분에 60000 msec임
-        long seconds = duration - (hours * 3600 + minutes * 60);
-
-        String result = "TIME length"+ time +"duration : "+ duration +" hours: " + hours + ", minutes: " + minutes + ", seconds: " + seconds;
-        return result;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,9 +102,6 @@ public class TimestampFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.recyclerView); //얘는 view대신 getView를 써야한다 이유는 위에서 return 했기 때문
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(linearLayoutManager);
-
-        //영상 길이 알아내기
-        Log.d(TAG, "Video Length : "+TimestampFragment.videoLength(fileURI));
 
         // view 설정
         word = view.findViewById(R.id.searchText);
@@ -165,7 +145,8 @@ public class TimestampFragment extends Fragment {
                     for (int i = 0; i < listTitle.size(); i++) {
                         // 각 List의 값들을 data 객체에 set 해줍니다.
                         Data data = new Data();
-                        data.setTitle(listTitle.get(i));
+                        String timeStamp = Integer.parseInt(listTitle.get(i))/6+":"+Integer.parseInt(listTitle.get(i))%6*10;
+                        data.setTitle(timeStamp);
                         data.setContent(listContent.get(i));
 
                         // 각 값이 들어간 data를 adapter에 추가합니다.
@@ -287,10 +268,11 @@ public class TimestampFragment extends Fragment {
     }
 
     // 여러개의 SttAsync을 돌린 뒤 취합하는 스레드
-    public class SttManage extends AsyncTask<Object, Integer, Void>{
+    public class SttManage extends AsyncTask<Object, Integer, String>{
 
+        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
-        protected Void doInBackground(Object... objects){
+        protected String doInBackground(Object... objects){
             int threadNum = (int)objects[0];
             FileWrite fw = (FileWrite)objects[1];
             String tempFilePath[] = (String[])objects[2];
@@ -300,7 +282,7 @@ public class TimestampFragment extends Fragment {
             try{
                 boolean check = pool.awaitTermination(60, TimeUnit.SECONDS);
                 if(check){
-                    progValue+=15;
+                    progValue+=10;
                     publishProgress();
 
                     for(int i = 0; i<threadNum; i++){
@@ -311,9 +293,12 @@ public class TimestampFragment extends Fragment {
                         publishProgress();
                     }
                 }
+                String suggestion = SuggestWord.suggest(txtPath);
+                progValue += 10;
+                return suggestion;
             }
-            catch(InterruptedException e){
-
+            catch(Exception e){
+                Log.e(TAG, e+"");
             }
             return null;
         }
@@ -323,20 +308,9 @@ public class TimestampFragment extends Fragment {
             progress.setProgress(progValue);
         }
 
-        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
-        protected void onPostExecute(Void v){
-            // suggest - 얘도 결국 HTTP 연결을 쓰니까 별도의 스레드가 필요함.
-            new Thread(){
-                @Override
-                public void run(){
-                    try {
-                        sgWord.setText(SuggestWord.suggest(txtPath));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }.start();
+        protected void onPostExecute(String suggestion){
+            sgWord.setText(suggestion);
             info.setText("를 검색해보세요!");
             submit.setEnabled(true);
         }

@@ -1,10 +1,10 @@
 package com.example.TimeStampFinder;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,62 +12,58 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemViewHolder> {
+public class ImageRecyclerAdapter extends RecyclerView.Adapter<ImageRecyclerAdapter.ItemViewHolder> {
 
-    Context context;
-    private ArrayList<Data> listData = new ArrayList<>();
+    private ArrayList<ImageData> image_listData = new ArrayList<>();
 
     @NonNull
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // LayoutInflater를 이용하여 전 단계에서 만들었던 item.xml을 inflate 시킵니다.
         // return 인자는 ViewHolder 입니다.
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_item, parent, false);
-        return new ItemViewHolder(view);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.img_recycler_item, parent, false);
+        return new ImageRecyclerAdapter.ItemViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        // Item을 하나, 하나 보여주는(bind 되는) 함수입니다.
-        holder.onBind(listData.get(position));
+        holder.onBind(image_listData.get(position));
     }
 
     @Override
     public int getItemCount() {
-        // RecyclerView의 총 개수 입니다.
-        return listData.size();
+        return image_listData.size();
     }
 
-    void addItem(Data data) {
+    void addItem(ImageData data) {
         // 외부에서 item을 추가시킬 함수입니다.
-        listData.add(data);
+        image_listData.add(data);
     }
 
     boolean removeAll(){
         // 외부에서 모든 Item을 제거할 함수입니다.
-        return listData.removeAll(listData);
+        return image_listData.removeAll(image_listData);
     }
 
     // RecyclerView의 핵심인 ViewHolder 입니다.
     // 여기서 subView를 setting 해줍니다.
     class ItemViewHolder extends RecyclerView.ViewHolder {
 
+        private ImageView imageView;
         private TextView index;
-        private TextView content;
         private Button tBtn;
 
         ItemViewHolder(View itemView) {
             super(itemView);
 
-            index= itemView.findViewById(R.id.textView1);
-            content = itemView.findViewById(R.id.textView2);
-            tBtn = itemView.findViewById(R.id.tBtn);
+            imageView= itemView.findViewById(R.id.image_imageView);
+            index = itemView.findViewById(R.id.image_textView);
+            tBtn = itemView.findViewById(R.id.image_tBtn);
         }
 
-        void onBind(Data data) {
+        void onBind(ImageData data) {
+            imageView.setImageBitmap(data.getImage());
             index.setText(data.getTitle());
-            content.setText(data.getContent());
-            int exsec = 30000;
 
             tBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
