@@ -65,9 +65,6 @@ public class TimestampFragment extends Fragment {
     private int threadNum = 5;
     private int progValue = 0;
 
-    // txtFile의 완성 여부 확인
-    public static void setFin(){ isFin = true; }
-
     //video 이름과 같은 wav 파일 이름 및 경로 알아내기 (파일 생성 X)
     private String getAudioFilePath(String fileName){
 
@@ -148,12 +145,10 @@ public class TimestampFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         context = getActivity().getApplicationContext();
 
-        // STT
-        // 빈 파일 생성, 경로만 미리 가져오기
-
+        // 오디오 분할 시작 -> 이후 멀티스레드로 텍스트 읽기 -> 텍스트 파일 합치기 자동 진행
         ExecutorService split = Executors.newSingleThreadExecutor();
-
         new SplitAsync().executeOnExecutor(split);
+        split.shutdown();
 
         // search 구현
         // submit 이미지 버튼을 클릭하면 검색이 시작된다.
@@ -187,9 +182,6 @@ public class TimestampFragment extends Fragment {
                 }
             }
         }));
-
-        // videocut test
-        //new VideoCut().execute();
     }
 
     // 파일 분할을 위한 Async
@@ -198,19 +190,16 @@ public class TimestampFragment extends Fragment {
         @Override
         protected Integer doInBackground(Object... objects) {
             int audioNum;
-            String audiopath = getAudioFilePath(fileURI);
-            // 2. extract Audio Stream(wav < 16bit 16kHz mono >) from Video(mp4)
-            //Log.d("AUDIOPATH","new audio file path = "+audiopath);
-            //Log.d("AUDIOPATH",fileURI);
-            new AudioExtractor().useFfmpeg(fileURI,audiopath); // mp4경로, wav경로
+            String audiopath = getAudioFilePath(fileURI);       // audioPath = fileURI(mp4의)의 경로
+            
+            //extract Audio Stream(wav < 16bit 16kHz mono >) from Video(mp4)
+            new AudioExtractor().useFfmpeg(fileURI, audiopath); // mp4경로, wav경로
 
-            // 3. wav 파일 쪼개기
-            //  wav -> 10sec씩 pcm 파일로 쪼개기 (파일명은 1.pcm, 2.pcm, ...)
-            File wav = new File(audiopath);   // audio_path = wav 파일 경로
+            // wav -> 10sec씩 pcm 파일로 쪼개기 (파일명은 0.pcm, 1.pcm, ...)
+            File wav = new File(audiopath);
             audioNum = new SplitAudio().splitWav2Pcm(wav,10, context);
 
             progValue += 10;
-
             return audioNum;
         }
 
@@ -219,24 +208,25 @@ public class TimestampFragment extends Fragment {
             progress.setProgress(progValue);
         }
 
+        // audioNum이 넘어오면 스레드를 분할해 텍스트 읽기 시작
         @Override
         protected void onPostExecute(Integer audioNum) {
-            int asyncNum = audioNum/threadNum;
-            SttAsync[] stt = new SttAsync[threadNum];
-            String[] tempFilePath = new String[threadNum];
-            ExecutorService manage = Executors.newSingleThreadExecutor();
-            ExecutorService pool = Executors.newFixedThreadPool(threadNum);
+            int asyncNum = audioNum/threadNum;                          // 한 스레드당 보낼 오디오 파일의 수
+            SttAsync[] stt = new SttAsync[threadNum];                   // 각 스레드를 담을 배열
+            String[] tempFilePath = new String[threadNum];              // 스레드당 임시 파일의 경로를 담을 배열 (temp0.txt ...)
+            ExecutorService manage = Executors.newSingleThreadExecutor();   // 이후 파일 통합시 사용할 스레드 풀
+            ExecutorService pool = Executors.newFixedThreadPool(threadNum); // 멀티스레드를 병렬 실행, 관리할 스레드 풀
 
             FileWrite fw = new FileWrite(txtName, context);         // 통합 txt
             txtPath = fw.create();
 
             // 각 스레드에 대해
             for(int i = 0; i<threadNum; i++){
-                FileWrite temp = new FileWrite(i+"temp.txt", context);
+                FileWrite temp = new FileWrite("temp"+i+".txt", context);
                 tempFilePath[i] = temp.create();
 
                 int audioStart = i*asyncNum;
-                int audioEnd = (i==threadNum-1)?audioNum-1:(i+1)*asyncNum-1;
+                int audioEnd = (i==threadNum-1)?audioNum-1:(i+1)*asyncNum-1;        // 오디오 파일의 끝이면 마지막 번호 return
 
                 stt[i] = new SttAsync(i, audioStart, audioEnd, temp, tempFilePath[i]);
                 stt[i].executeOnExecutor(pool);
@@ -261,7 +251,8 @@ public class TimestampFragment extends Fragment {
         private final String filePath;
         private String audioPath = context.getFilesDir()+"/";
 
-        String[] keys = {"2d40b072-37f1-4317-9899-33e0b3f5fb90","80ff5736-f813-4686-aca6-472739d8ebe0","25833dd1-e685-4f13-adc6-c85341d1bac5"};
+        String[] keys = {"2d40b072-37f1-4317-9899-33e0b3f5fb90","80ff5736-f813-4686-aca6-472739d8ebe0","25833dd1-e685-4f13-adc6-c85341d1bac5",
+                "40c498a8-7d33-4909-9b60-427b3d0ccf8b", "0913ccd7-0cd1-4455-8b60-7940aa54f7be"};
 
         public SttAsync(int keyNum, int startNum, int endNum, FileWrite fw, String filePath){
             this.startNum = startNum;
@@ -279,7 +270,7 @@ public class TimestampFragment extends Fragment {
             for (int i=startNum; i<=endNum; i++){
                 // num %2d로 처리
                 String numStr = Integer.toString(i);
-                String content = new Pcm2Text().pcm2text(audioPath+i+".pcm", keys[i%3]);
+                String content = new Pcm2Text().pcm2text(audioPath+i+".pcm", keys[keyNum]);
                 // 단어와 Content 함께 기록
                 if(i==startNum) fw.write(numStr+"\n"+content, filePath, true);
                 else            fw.write(numStr+"\n"+content, filePath, false);
@@ -335,14 +326,18 @@ public class TimestampFragment extends Fragment {
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
         protected void onPostExecute(Void v){
-            // suggest
-            try {
-                sgWord.setText(SuggestWord.suggest(txtPath));
-                info.setText("를 검색해보세요!");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
+            // suggest - 얘도 결국 HTTP 연결을 쓰니까 별도의 스레드가 필요함.
+            new Thread(){
+                @Override
+                public void run(){
+                    try {
+                        sgWord.setText(SuggestWord.suggest(txtPath));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
+            info.setText("를 검색해보세요!");
             submit.setEnabled(true);
         }
     }

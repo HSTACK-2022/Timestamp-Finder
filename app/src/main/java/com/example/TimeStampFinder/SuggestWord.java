@@ -1,6 +1,7 @@
 package com.example.TimeStampFinder;
 
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -150,7 +151,7 @@ public class SuggestWord {
             }
             return res;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("SUGGEST", e+"");
             return "ERROR";
         }
     }
