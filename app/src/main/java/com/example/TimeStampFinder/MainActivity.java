@@ -19,6 +19,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.File;
+
 import static com.example.TimeStampFinder.Uri2Path.getPath;
 
 
@@ -35,8 +37,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // 시작하자마자 사용자로부터 권한 확인
+        // 시작하자마자 사용자로부터 권한 확인 및 캐시 삭제
         checkPermission();
+        clearCache();
 
         // button을 클릭하면 파일을 불러옴.
         Button button = findViewById(R.id.button);
@@ -101,5 +104,27 @@ public class MainActivity extends AppCompatActivity {
         cursor.close();
 
         return fileName;
+    }
+
+    private void clearCache() {
+        final File cacheDirFile = this.getCacheDir();
+        if (null != cacheDirFile && cacheDirFile.isDirectory()) {
+            clearSubCacheFiles(cacheDirFile);
+        }
+    }
+
+    private void clearSubCacheFiles(File cacheDirFile) {
+        if (null == cacheDirFile || cacheDirFile.isFile()) {
+            return;
+        }
+        for (File cacheFile : cacheDirFile.listFiles()) {
+            if (cacheFile.isFile()) {
+                if (cacheFile.exists()) {
+                    cacheFile.delete();
+                }
+            } else {
+                clearSubCacheFiles(cacheFile);
+            }
+        }
     }
 }

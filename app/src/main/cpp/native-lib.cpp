@@ -9,21 +9,23 @@ using namespace cv;
 
 int processToNegative(Mat img_input, Mat &img_result)
 {
-    cvtColor( img_input, img_result, CV_RGBA2GRAY);
+    cvtColor( img_input, img_result, IMREAD_COLOR);
     Mat srcImage = img_result;
 
-//    if(srcImage.empty())
-//        LOGD("%s : empty!",__FUNCTION__);
+    Mat_<Vec3b>image(srcImage);
+    Mat_<Vec3b>destImage(srcImage.size());
 
-    Mat_<uchar>image(srcImage);
-    Mat_<uchar>destImage(srcImage.size());
-
-    for(int y = 0 ; y < image.rows ; y++){
-        for(int x = 0  ; x < image.cols; x++){
-            uchar r = image(y,x);
-            destImage(y,x) = 255 -r;
+    for (int y = 0; y < img_input.rows; ++y)
+    {
+        for (int x = 0; x < img_input.cols; ++x)
+        {
+            // Blue와 Red값을 바꿔 저장 - 반전 방지
+            destImage.at<Vec3b>(y, x)[0] = image.at<Vec3b>(y, x)[2];
+            destImage.at<Vec3b>(y, x)[1] = image.at<Vec3b>(y, x)[1];
+            destImage.at<Vec3b>(y, x)[2] = image.at<Vec3b>(y, x)[0];
         }
     }
+
     img_result = destImage.clone();
     return(0);
 }

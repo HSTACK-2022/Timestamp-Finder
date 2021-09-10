@@ -26,6 +26,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 
 import java.io.File;
+import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -38,11 +39,11 @@ public class StreamFragment extends Fragment {
 
     private final String TAG = "STREAM";
 
+    private Context context;
     private String fileURI;
     private int fileLength;
-    private static int count = 0;
-    private String imgName[];
-    private Context context;
+    private int fps = 30;       // frame 수 : default = 60
+    private Vector<String> imgName;
 
     private ImageRecyclerAdapter adapter;
     private ProgressBar progress;
@@ -66,7 +67,7 @@ public class StreamFragment extends Fragment {
         fileLength = bundle.getInt("fileLength");
         Log.d(TAG, "RESULT frag : " + fileURI +", "+fileLength);
 
-        imgName = new String[fileLength];
+        imgName = new Vector<String>();
     }
 
     @Override
@@ -81,9 +82,9 @@ public class StreamFragment extends Fragment {
         status = view.findViewById(R.id.statusText);
         adapter = new ImageRecyclerAdapter();
         recyclerView.setAdapter(adapter);
+        adapter.removeAll();
 
         status.setText(" 영상에서 장면을 추출하는 중...");
-
         return view;
     }
 
@@ -108,11 +109,8 @@ public class StreamFragment extends Fragment {
             s1 = s1.mul(s1);
             Scalar s = Core.sumElems(s1);
             double sse = s.val[0] + s.val[1] + s.val[2];
+            if (sse <= 1e-10)       return 0;
 
-            Log.d(TAG, "see : " + sse);
-
-            if (sse <= 1e-10)
-                return 0;
             double mse = sse / (double) (I1.channels() * I1.total());
             double psnr = 10.0 * log10((255 * 255) / mse);
             return psnr;
@@ -120,13 +118,10 @@ public class StreamFragment extends Fragment {
 
         public void saveImage(Mat res, int sec) {
             String path = context.getCacheDir() + "/scene" + sec + ".jpg";
-            imgName[count++] = path;
+            imgName.add(path);
 
-            // 이미지의 반전을 막기 위해 자체 반전 코드 추가
-            //convertNativeLibtoNegative(res.getNativeObjAddr(),res.getNativeObjAddr());
-            Mat out = res.clone();
-            Core.not
-
+            // 이미지 r, b 반전
+            convertNativeLibtoNegative(res.getNativeObjAddr(),res.getNativeObjAddr());
             Imgcodecs.imwrite(path, res);
         }
 
@@ -141,7 +136,7 @@ public class StreamFragment extends Fragment {
             Mat result[];
 
             cap.open(fileURI);
-            cap.set(CAP_PROP_FPS, 60);
+            cap.set(CAP_PROP_FPS, 30);
 
             while (cap.isOpened()) {
                 ++frameNum;
@@ -163,7 +158,7 @@ public class StreamFragment extends Fragment {
 
                     if (psnrV < CHANGE_DETECT_AUDIO) {
                         changeFrame = currFrame.clone();
-                        saveImage(changeFrame, frameNum/30);
+                        saveImage(changeFrame, frameNum/fps);
                     }
 
                     prevFrame = currFrame.clone();
@@ -187,17 +182,16 @@ public class StreamFragment extends Fragment {
             status.setText(" 장면 추출이 완료되었습니다.");
 
             // img정렬
-            for(int i = 0; i < count; i++){
+            for(int i = 0; i < imgName.size(); i++){
                 // 파일 제목 지정
-                String title[] = imgName[i].split("scene|.jpg");
+                String title[] = imgName.get(i).split("scene|.jpg");
                 int secs = Integer.parseInt(title[1]);
                 int mins = secs/60;
                 secs %= 60;
-                Log.d("CHECK", title[1]);
 
                 // 파일 이미지 지정
                 File imgFile;
-                imgFile = new File(imgName[i]);
+                imgFile = new File(imgName.get(i));
                 Bitmap bitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
                 adapter.addItem(new ImageData(bitmap, mins+":"+secs));
             }

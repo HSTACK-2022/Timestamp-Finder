@@ -3,6 +3,7 @@ package com.example.TimeStampFinder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.media.MediaExtractor;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
@@ -26,9 +27,11 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.File;
+import java.io.IOException;
 
 public class ConvertActivity extends AppCompatActivity {
 
+    int n = 0;
     private final String TAG = "CONVERT";
 
     public static Context mContext;
@@ -41,6 +44,9 @@ public class ConvertActivity extends AppCompatActivity {
     private Uri uriFilePath;
     private String txtName;
     private boolean isFull;         // 전체화면 여부를 받기 위한 변수
+    private String originHeight;
+    private String originWidth;
+    private MediaMetadataRetriever retriever;
 
     // 영상 길이를 확인하기 위한 함수
     public static int videoLength(String fileURI){
@@ -60,6 +66,7 @@ public class ConvertActivity extends AppCompatActivity {
 
         mContext = this;
         videoView = findViewById(R.id.videoView);
+        retriever = new MediaMetadataRetriever();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -100,13 +107,6 @@ public class ConvertActivity extends AppCompatActivity {
 
         //영상 길이 알아내기
         Log.d(TAG, "Video Length : " + videoLength(fileURI)+"sec.");
-    }
-
-    // Convert Activity 종료시 cache 파일 비우기
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        clearCache();
     }
 
     public void show(int n)
@@ -173,44 +173,40 @@ public class ConvertActivity extends AppCompatActivity {
         isFull = full;
         ViewGroup.LayoutParams params = layout.getLayoutParams();
 
+        // 비디오 파일의 가로세로 길이
+        retriever.setDataSource(this, Uri.parse(fileURI));
+        String originWidth = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
+        String originHeight = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
+
+        MediaExtractor mediaExtractor = new MediaExtractor();
+        try {
+            mediaExtractor.setDataSource(fileURI);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Log.d("프레임 길이: ", Integer.toString(n));
+        Log.d("메타데이터 길이 :", originWidth + " : " + originHeight);
+
         if (isFull) {
             isFull = true;
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            if (Integer.parseInt(originHeight) < Integer.parseInt(originWidth))
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            else
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         } else {
             isFull = false;
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
             DisplayMetrics metrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
             int height = (int) (metrics.density * 250);
             params.height = height;
-
+            //Log.d("videoview SIZE:", "x: " + videoView.getPivotX() + " y: " + videoView.getPivotY());
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-        }
-    }
-
-    private void clearCache() {
-        final File cacheDirFile = this.getCacheDir();
-        if (null != cacheDirFile && cacheDirFile.isDirectory()) {
-            clearSubCacheFiles(cacheDirFile);
-        }
-    }
-
-    private void clearSubCacheFiles(File cacheDirFile) {
-        if (null == cacheDirFile || cacheDirFile.isFile()) {
-            return;
-        }
-        for (File cacheFile : cacheDirFile.listFiles()) {
-            if (cacheFile.isFile()) {
-                if (cacheFile.exists()) {
-                    cacheFile.delete();
-                }
-            } else {
-                clearSubCacheFiles(cacheFile);
-            }
         }
     }
 }
