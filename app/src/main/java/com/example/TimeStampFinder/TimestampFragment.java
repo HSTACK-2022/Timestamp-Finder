@@ -51,19 +51,25 @@ public class TimestampFragment extends Fragment {
     private String fileURI;
     private String txtName;
     private String txtPath;
+    private String suggestion;
+    private boolean isFirst = true;
     private static boolean isFin = false;
 
     private EditText word;
     private ImageButton submit;
     private Switch mode;
-    private TextView sgWord;
     private TextView info;
+    private TextView sgWord;
     private ProgressBar progress;
 
     private Context context;
 
     private int threadNum = 5;
     private int progValue = 0;
+
+    private ExecutorService split = null;
+    private ExecutorService manage = null;
+    private ExecutorService pool = null;
 
     //video 이름과 같은 wav 파일 이름 및 경로 알아내기 (파일 생성 X)
     private String getAudioFilePath(String fileName){
@@ -114,8 +120,17 @@ public class TimestampFragment extends Fragment {
         adapter = new RecyclerAdapter();
         recyclerView.setAdapter(adapter);
 
-        submit.setEnabled(false);
-        sgWord.setText("파일 읽는 중...");
+        if(isFirst){
+            mode.setEnabled(false);
+            submit.setEnabled(false);
+            sgWord.setText("파일 읽는 중...");
+            progValue = 0;
+            progress.setProgress(0);
+        }
+        else{
+            sgWord.setText(suggestion);
+            info.setText("를 검색해보세요!");
+        }
 
         return view;
     }
@@ -125,11 +140,12 @@ public class TimestampFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         context = getActivity().getApplicationContext();
 
-        // 오디오 분할 시작 -> 이후 멀티스레드로 텍스트 읽기 -> 텍스트 파일 합치기 자동 진행
-        ExecutorService split = Executors.newSingleThreadExecutor();
-        new SplitAsync().executeOnExecutor(split);
-        split.shutdown();
-
+        if(isFirst){
+            // 오디오 분할 시작 -> 이후 멀티스레드로 텍스트 읽기 -> 텍스트 파일 합치기 자동 진행
+            split = Executors.newSingleThreadExecutor();
+            new SplitAsync().executeOnExecutor(split);
+            split.shutdown();
+        }
         // search 구현
         // submit 이미지 버튼을 클릭하면 검색이 시작된다.
         submit.setOnClickListener((new View.OnClickListener() {
@@ -165,6 +181,18 @@ public class TimestampFragment extends Fragment {
         }));
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        try {
+            boolean check = split.awaitTermination(30, TimeUnit.SECONDS);
+            if(manage!=null)    manage.awaitTermination(0, TimeUnit.SECONDS);
+            if(pool!=null)      pool.awaitTermination(0, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     // 파일 분할을 위한 Async
     public class SplitAsync extends AsyncTask<Object, Integer, Integer>{
 
@@ -195,8 +223,8 @@ public class TimestampFragment extends Fragment {
             int asyncNum = audioNum/threadNum;                          // 한 스레드당 보낼 오디오 파일의 수
             SttAsync[] stt = new SttAsync[threadNum];                   // 각 스레드를 담을 배열
             String[] tempFilePath = new String[threadNum];              // 스레드당 임시 파일의 경로를 담을 배열 (temp0.txt ...)
-            ExecutorService manage = Executors.newSingleThreadExecutor();   // 이후 파일 통합시 사용할 스레드 풀
-            ExecutorService pool = Executors.newFixedThreadPool(threadNum); // 멀티스레드를 병렬 실행, 관리할 스레드 풀
+            manage = Executors.newSingleThreadExecutor();   // 이후 파일 통합시 사용할 스레드 풀
+            pool = Executors.newFixedThreadPool(threadNum); // 멀티스레드를 병렬 실행, 관리할 스레드 풀
 
             FileWrite fw = new FileWrite(txtName, context);         // 통합 txt
             txtPath = fw.create(false);
@@ -255,7 +283,7 @@ public class TimestampFragment extends Fragment {
                 // 단어와 Content 함께 기록
                 if(i==startNum) fw.write(numStr+"\n"+content, filePath, true);
                 else            fw.write(numStr+"\n"+content, filePath, false);
-                progValue+=5;
+                progValue+=1;
                 publishProgress();
             }
             return null;
@@ -268,11 +296,11 @@ public class TimestampFragment extends Fragment {
     }
 
     // 여러개의 SttAsync을 돌린 뒤 취합하는 스레드
-    public class SttManage extends AsyncTask<Object, Integer, String>{
+    public class SttManage extends AsyncTask<Object, Integer, Void>{
 
         @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
-        protected String doInBackground(Object... objects){
+        protected Void doInBackground(Object... objects){
             int threadNum = (int)objects[0];
             FileWrite fw = (FileWrite)objects[1];
             String tempFilePath[] = (String[])objects[2];
@@ -280,7 +308,7 @@ public class TimestampFragment extends Fragment {
 
             // 스레드 작업이 모두 끝나면
             try{
-                boolean check = pool.awaitTermination(60, TimeUnit.SECONDS);
+                boolean check = pool.awaitTermination(300, TimeUnit.SECONDS);
                 if(check){
                     progValue+=10;
                     publishProgress();
@@ -289,13 +317,10 @@ public class TimestampFragment extends Fragment {
                         String str = FileWrite.read(tempFilePath[i]);
                         Log.d(TAG, tempFilePath[i]+": "+str);
                         fw.write(str, txtPath, true);
-                        progValue+=5;
+                        progValue+=1;
                         publishProgress();
                     }
                 }
-                String suggestion = SuggestWord.suggest(txtPath);
-                progValue += 10;
-                return suggestion;
             }
             catch(Exception e){
                 Log.e(TAG, e+"");
@@ -308,10 +333,24 @@ public class TimestampFragment extends Fragment {
             progress.setProgress(progValue);
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.N)
         @Override
-        protected void onPostExecute(String suggestion){
-            sgWord.setText(suggestion);
+        protected void onPostExecute(Void v){
+            new Thread(){
+                @Override
+                public void run(){
+                    try {
+                        isFirst = false;
+                        suggestion = SuggestWord.suggest(txtPath);
+                        progress.setProgress(progValue = 100);
+                        sgWord.setText(suggestion);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
             info.setText("를 검색해보세요!");
+            mode.setEnabled(true);
             submit.setEnabled(true);
         }
     }

@@ -54,6 +54,7 @@
         android:layout_weight="1"
         android:background="@drawable/botton_color_drawable"
         android:text="go"
-        android:textSize="10sp" />
+        android:textSize="12sp"
+        android:textStyle="bold" />
 
 </LinearLayout>

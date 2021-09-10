@@ -57,13 +57,12 @@ public class ImageRecyclerAdapter extends RecyclerView.Adapter<ImageRecyclerAdap
             super(itemView);
 
             imageView= itemView.findViewById(R.id.image_imageView);
-            index = itemView.findViewById(R.id.image_textView);
             tBtn = itemView.findViewById(R.id.image_tBtn);
         }
 
         void onBind(ImageData data) {
             imageView.setImageBitmap(data.getImage());
-            index.setText(data.getTitle());
+            tBtn.setText(data.getTitle());
 
             tBtn.setOnClickListener(new View.OnClickListener() {
                 @Override

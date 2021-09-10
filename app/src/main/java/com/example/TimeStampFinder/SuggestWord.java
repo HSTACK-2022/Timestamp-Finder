@@ -23,6 +23,8 @@ import com.google.gson.Gson;
 
 public class SuggestWord {
 
+    private final static String TAG="SUGGEST";
+
     static public class NameEntity {
         final String text;
         final String type;
@@ -90,7 +92,7 @@ public class SuggestWord {
             // http 요청 오류 시 처리
             if ( responseCode != 200 ) {
                 // 오류 내용 출력
-                System.out.println("[error] " + responBodyJson);
+                Log.d(TAG, responseCode + " : [error] " + responBodyJson);
                 return "HTTP ERROR";
             }
 
@@ -102,7 +104,7 @@ public class SuggestWord {
             // 분석 요청 오류 시 처리
             if ( result != 0 ) {
                 // 오류 내용 출력
-                System.out.println("[error] " + responeBody.get("result"));
+                Log.d(TAG, "[error] " + responeBody.get("result"));
                 return "RETURN ERROR";
             }
 

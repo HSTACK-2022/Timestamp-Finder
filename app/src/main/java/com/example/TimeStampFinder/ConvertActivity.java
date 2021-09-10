@@ -26,7 +26,6 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.io.File;
 import java.io.IOException;
 
 public class ConvertActivity extends AppCompatActivity {
@@ -185,7 +184,7 @@ public class ConvertActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Log.d("프레임 길이: ", Integer.toString(n));
+
         Log.d("메타데이터 길이 :", originWidth + " : " + originHeight);
 
         if (isFull) {

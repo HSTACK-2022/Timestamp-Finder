@@ -66,6 +66,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
 
         void onBind(Data data) {
             index.setText(data.getTitle());
+            tBtn.setText(data.getTitle());
             content.setText(data.getContent());
             int exsec = 30000;
 

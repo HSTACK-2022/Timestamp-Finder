@@ -29,6 +29,7 @@ import java.io.File;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.log10;
 import static org.opencv.core.CvType.CV_32F;
@@ -43,6 +44,7 @@ public class StreamFragment extends Fragment {
     private String fileURI;
     private int fileLength;
     private int fps = 30;       // frame 수 : default = 60
+    private boolean isFirst = true;
     private Vector<String> imgName;
 
     private ImageRecyclerAdapter adapter;
@@ -50,12 +52,14 @@ public class StreamFragment extends Fragment {
     private TextView status;
     private double progValue = 0;
 
+    private ExecutorService sceneCut;
+
     static {
         System.loadLibrary("opencv_java4");
         System.loadLibrary("native-lib");
     }
 
-    public native int convertNativeLibtoNegative(long addrInput, long addrResult);
+    public native int convertNativeLibtoNegative(long addr_input, long addr_result);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,7 +88,16 @@ public class StreamFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         adapter.removeAll();
 
-        status.setText(" 영상에서 장면을 추출하는 중...");
+        if(isFirst) {
+            progress.setProgress((int)(progValue=0.0));
+            status.setText(" 영상에서 장면을 추출하는 중...");
+        }
+        else {
+            status.setText("");
+            status.setTextColor(Color.GRAY);
+            status.setText(" 장면 추출이 완료되었습니다.");
+        }
+
         return view;
     }
 
@@ -93,11 +106,21 @@ public class StreamFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         context = getActivity().getApplicationContext();
 
-        ExecutorService sceneCut = Executors.newSingleThreadExecutor();
-        new SceneCutAsync().executeOnExecutor(sceneCut);
-        sceneCut.shutdown();
+        if(isFirst){
+            sceneCut = Executors.newSingleThreadExecutor();
+            new SceneCutAsync().executeOnExecutor(sceneCut);
+            sceneCut.shutdown();
+        }
+    }
 
-        Log.d(TAG, "END");
+    @Override
+    public void onPause() {
+        super.onPause();
+        try {
+            sceneCut.awaitTermination(0, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public class SceneCutAsync extends AsyncTask<Void, Integer, Void> {
@@ -128,7 +151,7 @@ public class StreamFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
             int frameNum = -1;
-            double psnrV, CHANGE_DETECT_AUDIO = 10.0;
+            double psnrV, CHANGE_DETECT_AUDIO = 20.0;
             VideoCapture cap = new VideoCapture();
             Mat prevFrame = new Mat();
             Mat currFrame = new Mat();
@@ -163,6 +186,7 @@ public class StreamFragment extends Fragment {
 
                     prevFrame = currFrame.clone();
                 }
+
                 progValue += 100.0/(fileLength*60);
                 publishProgress();
             }
@@ -176,6 +200,7 @@ public class StreamFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void v){
+            isFirst = false;
             progValue = 100;
             status.setTextColor(Color.GRAY);
             progress.setProgress((int)progValue);
