@@ -4,6 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
+import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -26,6 +29,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.videoio.VideoCapture;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,7 +47,6 @@ public class StreamFragment extends Fragment {
     private Context context;
     private String fileURI;
     private int fileLength;
-    private int fps = 30;       // frame 수 : default = 60
     private boolean isFirst = true;
     private Vector<String> imgName;
 
@@ -117,13 +120,32 @@ public class StreamFragment extends Fragment {
     public void onPause() {
         super.onPause();
         try {
-            sceneCut.awaitTermination(0, TimeUnit.SECONDS);
+            sceneCut.awaitTermination(1, TimeUnit.SECONDS);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public class SceneCutAsync extends AsyncTask<Void, Integer, Void> {
+
+        public int getFPS(){
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            MediaExtractor extractor = new MediaExtractor();
+            try {
+                extractor.setDataSource(fileURI);
+                MediaFormat format = extractor.getTrackFormat(0);
+                extractor.release();
+                if(format.containsKey(MediaFormat.KEY_FRAME_RATE)){
+                    int frameRate = format.getInteger(MediaFormat.KEY_FRAME_RATE);
+                    int frame = (int) (frameRate * (format.getLong(MediaFormat.KEY_DURATION)/1000000));
+                    Log.d(TAG,"FPS : "+frameRate);
+                    return frameRate;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return -1;
+        }
 
         public double getPSNR(Mat I1, Mat I2) {
             Mat s1 = new Mat(I1.rows(), I1.cols(), I1.type());
@@ -151,7 +173,8 @@ public class StreamFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
             int frameNum = -1;
-            double psnrV, CHANGE_DETECT_AUDIO = 20.0;
+            int fps = getFPS();
+            double psnrV, CHANGE_DETECT_AUDIO = 15.0;
             VideoCapture cap = new VideoCapture();
             Mat prevFrame = new Mat();
             Mat currFrame = new Mat();
@@ -159,7 +182,6 @@ public class StreamFragment extends Fragment {
             Mat result[];
 
             cap.open(fileURI);
-            cap.set(CAP_PROP_FPS, 30);
 
             while (cap.isOpened()) {
                 ++frameNum;
@@ -187,7 +209,7 @@ public class StreamFragment extends Fragment {
                     prevFrame = currFrame.clone();
                 }
 
-                progValue += 100.0/(fileLength*60);
+                progValue += 100.0/(fileLength*fps);
                 publishProgress();
             }
             return null;

@@ -1,13 +1,9 @@
 package com.example.TimeStampFinder;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,22 +20,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import static java.lang.Thread.sleep;
 
 public class TimestampFragment extends Fragment {
 
@@ -185,9 +171,9 @@ public class TimestampFragment extends Fragment {
     public void onPause() {
         super.onPause();
         try {
-            boolean check = split.awaitTermination(30, TimeUnit.SECONDS);
-            if(manage!=null)    manage.awaitTermination(0, TimeUnit.SECONDS);
-            if(pool!=null)      pool.awaitTermination(0, TimeUnit.SECONDS);
+            split.awaitTermination(1, TimeUnit.SECONDS);
+            if(manage!=null)    manage.awaitTermination(1, TimeUnit.SECONDS);
+            if(pool!=null)      pool.awaitTermination(1, TimeUnit.SECONDS);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -4,23 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ConvertActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".ConvertActivity">
 
     <!--    <fragment-->
-<!--        android:id="@+id/fragment1"-->
-<!--        android:name="com.example.sttexam.streamFragment"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        app:layout_constraintBottom_toTopOf="@+id/fragment2"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
+    <!--        android:id="@+id/fragment1"-->
+    <!--        android:name="com.example.sttexam.streamFragment"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        app:layout_constraintBottom_toTopOf="@+id/fragment2"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="parent" />-->
 
     <FrameLayout
         android:id="@+id/videoview_frame"
         android:layout_width="match_parent"
-        android:layout_height="270dp" >
+        android:layout_height="270dp">
 
         <VideoView
             android:id="@+id/videoView"
@@ -32,20 +32,20 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_gravity="end|bottom"
-            android:layout_marginBottom="10dp"
             android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
             android:background="@drawable/fullicon" />
 
     </FrameLayout>
 
-<!--    <VideoView-->
-<!--        android:id="@+id/videoView"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="0dp"-->
-<!--        android:layout_weight="6"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
+    <!--    <VideoView-->
+    <!--        android:id="@+id/videoView"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="0dp"-->
+    <!--        android:layout_weight="6"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="parent" />-->
 
 
     <FrameLayout
@@ -54,8 +54,7 @@
         android:layout_height="0dp"
         android:layout_weight="10"
         tools:layout_editor_absoluteX="203dp"
-        tools:layout_editor_absoluteY="281dp">
-    </FrameLayout>
+        tools:layout_editor_absoluteY="281dp"></FrameLayout>
 
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -63,29 +62,31 @@
         android:layout_width="match_parent"
         android:layout_height="15dp"
         android:layout_weight="1"
-        app:itemRippleColor="@color/white"
-        app:itemTextColor="#FFFFFF"
+        android:background="@color/point"
+        app:itemIconTint="@color/item_selector"
+        app:itemRippleColor="@color/point"
+        app:itemTextColor="@color/item_selector"
         app:menu="@menu/navigation_menu" />
 
-<!--    <fragment-->
-<!--        android:id="@+id/wFragment"-->
-<!--        android:name="com.example.sttexam.timestampFragment"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:layout_weight="4"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toBottomOf="@+id/videoView" />-->
+    <!--    <fragment-->
+    <!--        android:id="@+id/wFragment"-->
+    <!--        android:name="com.example.sttexam.timestampFragment"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:layout_weight="4"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toBottomOf="@+id/videoView" />-->
 
     <!--    <FrameLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent">-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent">-->
 
-<!--        <ListView-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="603dp" />-->
-<!--    </FrameLayout>-->
+    <!--        <ListView-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="603dp" />-->
+    <!--    </FrameLayout>-->
 
 
 </LinearLayout>

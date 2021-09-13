@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:backgroundTint="#FAFAFA"
     android:orientation="vertical">
 
     <!-- TODO: Update blank fragment layout -->
@@ -34,8 +35,10 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:scaleType="center"
-                app:srcCompat="@drawable/imgbutton_drawable" />
+                android:backgroundTint="#FAFAFA"
+                android:scaleType="fitCenter"
+                android:tint="@color/search_selector"
+                app:srcCompat="@mipmap/search" />
 
         </LinearLayout>
 
@@ -64,7 +67,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="6"
                 android:textAlignment="gravity"
-                android:textColor="@color/purple_700" />
+                android:textColor="@color/point" />
 
             <TextView
                 android:id="@+id/infoTextView"
