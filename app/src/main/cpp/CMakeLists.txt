@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
-set(pathPROJECT D:/programming/2021_SUMMER/TimeStampFinder) # 수정필요
+set(pathPROJECT E:/2021_SUMMER/TimeStampFinder) # 고정위치. 수정필요
 set(pathOPENCV ${pathPROJECT}/opencv)
 set(pathLIBOPENCV_JAVA ${pathOPENCV}/native/libs/${ANDROID_ABI}/libopencv_java4.so)
 

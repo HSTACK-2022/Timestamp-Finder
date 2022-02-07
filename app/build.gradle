@@ -4,7 +4,7 @@ plugins {
 
 android {
     // compileSdkVersion, targetSdkVersion 30 -> 29 (0811)
-    compileSdkVersion 29
+    compileSdkVersion 31
     buildToolsVersion "30.0.3"
     ndkVersion "20.0.5594570"
 
@@ -12,7 +12,7 @@ android {
         applicationId "com.example.TimeStampFinder"
         // 23 -> 19(0810) -> 21(0811)
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
 
