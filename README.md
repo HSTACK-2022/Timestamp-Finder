@@ -17,6 +17,10 @@ TimeStampFinder/opencv/cpp/CMakeLists.txt에서,
 ---
 
 ### 🏆 한성대학교 제 17회 한성공학경진대회 입상 🏆
+✏ 시연영상 : https://www.youtube.com/watch?v=XoeSencsBN8
+
+✏ 소개영상 : https://www.youtube.com/watch?v=Cy15lsRiFMU
+
 | ![금상](./img/award1.jpg) | ![특허부문동상](./img/award2.jpg) |
 | --- | --- |
 | 작품부문 금상 | 특허부문 동상 |
