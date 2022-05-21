@@ -1,4 +1,4 @@
-# TimeStampFinder
+# Video Searcher
 검색 가능한 비디오 플레이어 Android application
 
 ---
